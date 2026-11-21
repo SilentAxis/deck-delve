@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#16121f">
+<title>Deck Delve</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<style>
+:root{--bg:#16121f;--panel:#221c30;--panel2:#2c2540;--txt:#eee8f7;--mut:#a59cb8;--str:#e6b422;--agi:#e0559a;--mag:#3d8bfd;--emp:#111;--ok:#3fb67b;--bad:#e25555;--acc:#b48cff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:env(safe-area-inset-top) 10px calc(env(safe-area-inset-bottom) + 20px)}
+h1,h2,h3{margin:.4em 0}h1{font-size:22px}h2{font-size:18px}h3{font-size:15px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.panel{background:var(--panel);border-radius:14px;padding:12px;margin:10px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grow{flex:1}
+button{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid #3d3456;border-radius:10px;padding:10px 12px;min-height:44px}
+button.pri{background:var(--acc);color:#1a1029;border:0;font-weight:700}
+button.danger{background:#4a1f2a;border-color:#7a2d3d}
+button:disabled{opacity:.4}
+button.sel{outline:3px solid #fff}
+input,select{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid #3d3456;border-radius:10px;padding:10px;min-height:44px;width:100%}
+.mut{color:var(--mut);font-size:13px}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;display:flex;gap:10px;flex-wrap:wrap;font-size:14px;border-bottom:1px solid #2e2742}
+.top b{color:#fff}
+.pill{background:var(--panel2);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.c-str{--c:var(--str)}.c-agi{--c:var(--agi)}.c-mag{--c:var(--mag)}.c-emp{--c:var(--emp)}
+.die{width:48px;height:48px;min-height:0;padding:0;border-radius:10px;background:var(--c);color:#fff;font-size:22px;font-weight:800;border:2px solid rgba(255,255,255,.25);text-shadow:0 1px 2px #000}
+.c-str.die{color:#2a1d00;text-shadow:none}
+.c-emp.die{border-color:#fff}
+.die.sel{outline:4px solid #fff;transform:translateY(-3px)}
+.mini{display:inline-flex;width:24px;height:24px;border-radius:6px;background:var(--c);color:#fff;font-weight:800;font-size:13px;align-items:center;justify-content:center;margin:1px;border:1px solid rgba(255,255,255,.3)}
+.c-str.mini{color:#2a1d00}
+.box{display:flex;flex-direction:column;gap:4px;min-width:84px;min-height:70px;padding:8px;border-radius:12px;background:#0d0a14;border:3px solid var(--c);text-align:left}
+.box.wide{min-width:150px}
+.box.covered{background:color-mix(in srgb,var(--c) 30%,#0d0a14);border-style:solid}
+.box.covered::after{content:"✓ covered";font-size:12px;color:var(--ok);font-weight:700}
+.box .v{font-size:20px;font-weight:800}
+.box .cons{font-size:13px}
+.chip{display:inline-block;padding:2px 7px;border-radius:7px;border:2px solid var(--c);margin:2px;font-size:13px;white-space:nowrap}
+.hero{background:var(--panel2);border-radius:12px;padding:9px;margin:6px 0}
+.hp{height:8px;background:#3a1a22;border-radius:9px;overflow:hidden;margin:4px 0}
+.hp>i{display:block;height:100%;background:linear-gradient(90deg,#e25555,#ff8a65)}
+.door{flex:1 1 140px;background:var(--panel2);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.door.closed{align-items:center;justify-content:center;font-size:38px;min-height:110px}
+.card{background:#1a1526;border:1px solid #3d3456;border-radius:12px;padding:10px;margin:6px 0}
+.card .nm{font-weight:800;font-size:17px}
+.art{display:block;width:100%;aspect-ratio:8/5;border-radius:10px;margin:0 0 8px;background:#efe5cf;object-fit:cover;box-shadow:0 2px 8px #0006}
+.door .art{margin:0 0 4px}
+.art.banner{aspect-ratio:16/7}
+.tag{font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:5px;background:#3d3456;color:var(--mut)}
+.log{font-size:13px;color:var(--mut);max-height:220px;overflow:auto}
+.log div{padding:3px 0;border-bottom:1px solid #2a2338}
+.log div:first-child{color:var(--txt)}
+.seat{display:flex;align-items:center;gap:8px;background:var(--panel2);padding:8px;border-radius:12px;margin:6px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:#555}.dot.on{background:var(--ok)}
+.big{font-size:28px;text-align:center;margin:20px 0}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#e25555;color:#fff;padding:10px 16px;border-radius:12px;font-weight:600;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;z-index:20}
+#toast.show{opacity:1}
+#conn{position:fixed;top:6px;right:8px;font-size:11px;z-index:30}
+details summary{cursor:pointer;color:var(--acc);padding:6px 0}
+.skill{display:flex;gap:8px;align-items:center;margin:4px 0}
+.skill button{flex:0 0 auto}
+.youbadge{background:var(--acc);color:#1a1029;border-radius:6px;padding:0 6px;font-size:12px;font-weight:700}
+</style>
+</head>
+<body>
+<div id="conn"></div>
+<div id="app"><p class="big">Connecting…</p></div>
+<div id="toast"></div>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const CN = { str: 'Strength', agi: 'Agility', mag: 'Magic', emp: 'Empowered' };
+const CS = { str: 'STR', agi: 'AGI', mag: 'MAG', emp: 'ANY' };
+const HERO_ICON = { warrior: '🛡️', rogue: '🗡️', mage: '🔮', archer: '🏹', paladin: '✝️' };
+
+let token = localStorage.getItem('dd_token');
+if (!token) { token = 'p' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('dd_token', token); }
+let myName = localStorage.getItem('dd_name') || '';
+let myHero = localStorage.getItem('dd_hero') || '';
+let S = null, ws = null, sel = [], pendingClaim = null, deferred = false;
+
+function connect() {
+  ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`);
+  ws.onopen = () => { $('conn').textContent = ''; ws.send(JSON.stringify({ type: 'hello', token })); };
+  ws.onmessage = (e) => {
+    const m = JSON.parse(e.data);
+    if (m.type === 'state') { S = m.state; render(); }
+    if (m.type === 'error') toast(m.msg);
+  };
+  ws.onclose = () => { $('conn').textContent = '🔴 reconnecting…'; setTimeout(connect, 1500); };
+}
+function act(a) { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type: 'act', action: a })); else toast('Reconnecting…'); }
+let tt; function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2600); if (navigator.vibrate) navigator.vibrate(60); }
+
+// ---------- small renderers ----------
+const artSlug = (n) => String(n).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const artImg = (n) => `<img class="art" src="/art/${artSlug(n)}.svg" alt="${esc(n)}" loading="lazy" onerror="this.remove()">`;
+const mini = (d) => `<span class="mini c-${d.color}">${d.value}</span>`;
+function boxChip(b) {
+  const cons = [b.armor ? '🛡' : '', b.dmg ? `💥${b.dmg}` : '', b.time ? `⏳${b.time}` : '', b.skull ? `💀${b.skull}` : ''].filter(Boolean).join(' ');
+  return `<span class="chip c-${b.color}">${CS[b.color]} ${b.wide ? 'Σ' : ''}${b.value}${b.wide ? '' : '+'} ${cons}</span>`;
+}
+function cardHtml(c, opts = {}) {
+  if (!c) return '';
+  let body = '';
+  if (c.type === 'monster') body = `<div>${c.boxes.map(boxChip).join('')}</div>`;
+  else body = c.options.map((o, i) => `<div class="row" style="margin:4px 0"><span class="grow">${String.fromCharCode(65 + i)}. ${esc(o.label)}${o.cost ? ` <b>(⏳${o.cost})</b>` : ''}</span>${boxChip(o.box)}</div>`).join('');
+  const rewards = opts.rewards !== false ? `<div class="mut" style="margin-top:6px">🎁 Item: ${esc(c.item)} · ✨ Skill <b>${esc(c.skill.name)}</b>: ${esc(c.skill.desc)} · 📈 ${c.xp} XP</div>` : '';
+  return `<div class="card">${opts.art === false ? '' : artImg(c.name)}<div class="row"><span class="nm grow">${c.type === 'monster' ? '👹' : '⚠️'} ${esc(c.name)}</span><span class="tag">${c.type}</span></div>${body}${rewards}</div>`;
+}
+function heroHtml(h) {
+  const left = h.stats.hp - h.damage;
+  const me = S.you === h.seat ? ' <span class="youbadge">YOU</span>' : '';
+  const dice = ['str', 'agi', 'mag'].map((c) => `<span class="chip c-${c}">${CS[c]} ×${h.stats[c]}</span>`).join('');
+  const items = h.items.length ? h.items.map((i) => `🎒 <b>${esc(i.name)}</b> <span class="mut">${esc(i.desc)}</span>`).join('<br>') : '<span class="mut">No items</span>';
+  const skills = h.skills.map((k) => `✨ <b>${esc(k.name)}</b>${k.start ? ' <span class="tag">start</span>' : ''} <span class="mut">${esc(k.desc)}</span>`).join('<br>');
+  const canPot = S.party.potions > 0 && h.damage > 0 && !['won', 'lost'].includes(S.phase);
+  return `<div class="hero"><div class="row"><span class="grow">${HERO_ICON[h.heroId] || ''} <b>${esc(h.name)}</b> <span class="mut">${h.cls}</span>${me}</span>
+    <span>❤️ ${left}/${h.stats.hp}</span>${canPot ? `<button data-a="potion" data-seat="${h.seat}" style="min-height:34px;padding:4px 8px">🧪 Drink</button>` : ''}</div>
+    <div class="hp"><i style="width:${Math.max(0, 100 * left / h.stats.hp)}%"></i></div>
+    <div>${dice}</div>
+    <details><summary>Items ${h.items.length}/${S.party.itemCap} · Skills ${h.skills.length - 1}/${S.party.skillCap}</summary><div style="font-size:13px">${items}<br>${skills}</div></details></div>`;
+}
+
+// ---------- lobby ----------
+function renderLobby() {
+  const taken = new Set(S.seats.filter(Boolean).map((x) => x.hero));
+  const mine = S.you >= 0 ? S.seats[S.you] : null;
+  const dg = Object.entries(S.dungeons).map(([id, d]) => `<button class="${S.dungeonId === id ? 'pri' : ''}" data-a="dungeon" data-id="${id}">${esc(d.name)} ${'★'.repeat(d.stars)}</button>`).join('');
+  const D = S.dungeons[S.dungeonId];
+  const heroes = Object.entries(S.heroCatalog).map(([id, h]) => {
+    const st = h.duo; const dis = taken.has(id) && !(mine && mine.hero === id);
+    return `<button data-a="pickHero" data-id="${id}" class="${myHero === id ? 'sel' : ''}" ${dis ? 'disabled' : ''} style="flex:1 1 140px;text-align:left">
+      ${HERO_ICON[id]} <b>${h.name}</b><br><span class="mut">❤️${st.hp} · <span style="color:var(--str)">S${st.str}</span> <span style="color:var(--agi)">A${st.agi}</span> <span style="color:var(--mag)">M${st.mag}</span><br>${esc(h.start.name)}: ${esc(h.start.desc)}</span></button>`;
+  }).join('');
+  const seats = S.seats.map((x, i) => {
+    if (!x) return `<div class="seat"><span class="grow">Seat ${i + 1} — <span class="mut">empty</span></span><button class="pri" data-a="sit" data-seat="${i}">Sit here</button></div>`;
+    const isMe = S.you === i;
+    return `<div class="seat"><span class="dot ${x.online ? 'on' : ''}"></span><span class="grow">Seat ${i + 1} — ${HERO_ICON[x.hero]} <b>${esc(x.name)}</b> <span class="mut">${S.heroCatalog[x.hero].name}</span> ${isMe ? '<span class="youbadge">YOU</span>' : ''}</span>
+      ${isMe ? `<button data-a="leave">Leave</button>` : x.online ? '' : `<button data-a="claimSeat" data-seat="${i}">That's me</button> <button class="danger" data-a="kick" data-seat="${i}">✕</button>`}</div>`;
+  }).join('');
+  const n = S.seats.filter(Boolean).length;
+  return `<h1>🎲 Deck Delve</h1><p class="mut">Co-op dungeon crawl. Each phone picks a seat — no accounts. All dice are rolled on the server.</p>
+  <div class="panel"><h3>1 · Your name & hero</h3><input id="name" placeholder="Your name" value="${esc(myName)}" maxlength="16"><div class="row" style="margin-top:8px">${heroes}</div></div>
+  <div class="panel"><h3>2 · Pick a seat</h3>${seats}</div>
+  <div class="panel"><h3>3 · Dungeon</h3><div class="row">${dg}</div><p class="mut">Boss: <b>${esc(D.boss)}</b><br>${D.floors.map((f, i) => `Floor ${i + 1}: ${esc(f)}`).join('<br>')}</p></div>
+  <button class="pri" style="width:100%;font-size:18px" data-a="start" ${S.you < 0 ? 'disabled' : ''}>Start adventure (${n} hero${n === 1 ? '' : 'es'})</button>
+  ${rulesHelp()}`;
+}
+function rulesHelp() {
+  return `<details class="panel"><summary>How to play</summary><div class="mut" style="font-size:14px">
+  <p><b>Goal:</b> get through 3 floors, then beat the boss. If any hero runs out of health, everyone loses.</p>
+  <p><b>Each turn</b> costs ⏳2 time (2 cards are discarded from the deck). Then either <b>Explore</b> (fill up to 4 face-down doors) or <b>Enter</b> a door. A freshly opened door can be fled from; an already-open one must be faced.</p>
+  <p><b>Fights:</b> the server rolls everyone's dice. Tap a die, then tap a box to cover it. A box needs a die of its colour (or black Empowered) with at least its number; Σ boxes add up several dice. 🛡 boxes must be covered first. Uncovered boxes cost 💥 damage and ⏳ time. Select 2 dice and tap <b>Combine</b> to make one Empowered die worth the lower value.</p>
+  <p><b>Skills:</b> select the die to pay with (and a 2nd die as the target if the skill needs one), then tap the skill. Each skill once per fight.</p>
+  <p><b>Perils:</b> pick one of two approaches — only dice of that colour are rolled.</p>
+  <p><b>Rewards:</b> each beaten card becomes an item (more dice/health), a skill, a potion (heals 3), or XP. Levels give more slots, a potion, and bonus Empowered dice.</p>
+  <p><b>Stairs:</b> when the deck runs out, the stairs appear. Descend whenever you like; lingering costs damage (every 3 time = 💥1).</p></div></details>`;
+}
+
+// ---------- game ----------
+function topBar() {
+  const p = S.party; const where = S.floor > 3 ? '👑 Boss' : `Floor ${S.floor}/3`;
+  return `<div class="top"><span class="pill"><b>${esc(S.dungeons[S.dungeonId].name)}</b> · ${where}</span><span class="pill">🂠 ${S.deck}</span>
+  ${S.stairs ? `<span class="pill">🪜 ${S.stairsTokens}/3</span>` : ''}<span class="pill">⭐ L${p.level} · ${p.xp}/${p.need} XP</span><span class="pill">🧪 ${p.potions}</span></div>`;
+}
+function renderTurn() {
+  const doors = S.doors.map((d, i) => d.open
+    ? `<div class="door">${cardHtml(d.card)}<button class="pri" data-a="enter" data-door="${i}">Face it (⏳2)</button></div>`
+    : `<div class="door closed">🚪<button data-a="enter" data-door="${i}" style="font-size:15px">Open door (⏳2)</button></div>`).join('');
+  const canExplore = !S.stairs && S.doors.length < 4;
+  return `<div class="panel"><h2>Turn ${S.turn}</h2><p class="mut">${esc(S.modText)}</p>
+    <div class="row">${doors || '<p class="mut">No doors yet — explore!</p>'}</div>
+    <div class="row" style="margin-top:10px">
+      <button class="grow" data-a="explore" ${canExplore ? '' : 'disabled'}>🔦 Explore (⏳2)</button>
+      ${S.stairs ? `<button class="pri grow" data-a="descend">🪜 Descend${S.floor === 3 ? ' to the boss' : ''}</button>` : ''}
+    </div></div>`;
+}
+function renderReveal() {
+  return `<div class="panel"><h2>The door creaks open…</h2>${cardHtml(S.current)}
+  <div class="row"><button class="pri grow" data-a="fight">${S.current.type === 'monster' ? '⚔️ Fight' : '⚠️ Face it'}</button><button class="grow" data-a="flee">🏃 Back away</button></div></div>`;
+}
+function renderPeril() {
+  const c = S.current;
+  return `<div class="panel">${artImg(c.name)}<h2>⚠️ ${esc(c.name)}</h2><p class="mut">Choose an approach. Only dice of that colour (plus Empowered) are rolled.</p>
+  ${c.options.map((o, i) => `<button style="width:100%;margin:5px 0;text-align:left" data-a="choose" data-opt="${i}"><b>${esc(o.label)}</b>${o.cost ? ` (⏳${o.cost})` : ''}<br>${boxChip(o.box)}</button>`).join('')}</div>`;
+}
+function renderCombat() {
+  const c = S.combat;
+  sel = sel.filter((id) => c.dice.some((d) => d.id === id && d.box === null));
+  const free = c.dice.filter((d) => d.box === null).sort((a, b) => a.color.localeCompare(b.color) || b.value - a.value);
+  const title = c.boss ? `👑 ${esc(S.boss.name)} — round ${c.round}` : `${S.current.type === 'monster' ? '⚔️' : '⚠️'} ${esc(S.current.name)}`;
+  const bossBar = c.boss ? `<div class="hp"><i style="width:${100 * Math.max(0, S.boss.hp - S.boss.damage) / S.boss.hp}%;background:linear-gradient(90deg,#8b5cf6,#c084fc)"></i></div><p class="mut">Boss health ${Math.max(0, S.boss.hp - S.boss.damage)}/${S.boss.hp}. Each covered 💀 deals damage; then a new round is rolled.</p>` : '';
+  const boxes = c.boxes.map((b, i) => {
+    const sum = b.dice.reduce((t, id) => t + (c.dice.find((d) => d.id === id) || { value: 0 }).value, 0);
+    const cons = [b.armor ? '🛡 armor' : '', b.dmg ? `💥${b.dmg}` : '', b.time ? `⏳${b.time}` : '', b.skull ? `💀${b.skull}` : ''].filter(Boolean).join(' ');
+    return `<button class="box c-${b.color} ${b.wide ? 'wide' : ''} ${b.covered ? 'covered' : ''}" data-a="box" data-box="${i}">
+      <span class="v">${CS[b.color]} ${b.wide ? 'Σ' : ''}${b.value}${b.wide ? '' : '+'}</span><span class="cons">${cons}</span>
+      <span>${b.dice.map((id) => mini(c.dice.find((d) => d.id === id))).join('')}${b.wide && b.dice.length ? ` <span class="mut">=${sum}</span>` : ''}</span></button>`;
+  }).join('');
+  const dice = free.map((d) => `<button class="die c-${d.color} ${sel.includes(d.id) ? 'sel' : ''}" data-a="die" data-id="${d.id}">${d.value}</button>`).join('') || '<span class="mut">No unplaced dice</span>';
+  let dmg = 0, time = 0;
+  for (const b of c.boxes) if (!b.covered) { dmg += b.dmg; time += b.time; }
+  if (!c.boss && S.modText.startsWith('Vicious') && c.boxes.some((b) => !b.covered)) dmg++;
+  dmg = Math.max(0, dmg - c.ward); time = Math.max(0, time - c.haste);
+  const skills = S.heroes.flatMap((h) => h.skills.map((k) => {
+    const used = c.used[`${h.seat}:${k.id}`];
+    return `<div class="skill"><button data-a="skill" data-seat="${h.seat}" data-skill="${k.id}" ${used ? 'disabled' : ''}>✨ ${esc(k.name)}</button><span class="mut">${HERO_ICON[h.heroId]} ${esc(k.desc)}</span></div>`;
+  })).join('');
+  const hint = sel.length === 0 ? 'Tap a die to select it.' : sel.length === 1 ? 'Tap a box to place it — or select a 2nd die to Combine / use as a skill target.' : 'Tap a box to place all selected dice, Combine them, or use a skill (1st = cost, 2nd = target).';
+  return `<div class="panel">${artImg(c.boss ? S.boss.name : S.current.name).replace('class="art"', 'class="art banner"')}<h2>${title}</h2>${bossBar}
+    <div class="row">${boxes}</div>
+    <p class="mut" style="margin:8px 0">${hint}${c.ward ? ` · 🛡 Ward ${c.ward}` : ''}${c.haste ? ` · 💨 Haste ${c.haste}` : ''}</p>
+    <div class="row">${dice}</div>
+    <div class="row" style="margin-top:10px">
+      <button data-a="combine" ${sel.length === 2 && !S.noCombine ? '' : 'disabled'}>⚫ Combine</button>
+      <button data-a="resetDice">↩︎ Reset</button>
+      <button class="pri grow" data-a="resolve">${dmg || time ? `Resolve (take ${[dmg ? '💥' + dmg : '', time ? '⏳' + time : ''].filter(Boolean).join(' ')})` : 'Resolve ✓'}</button>
+    </div>
+    <details ${skills ? 'open' : ''}><summary>Skills</summary>${skills}</details></div>`;
+}
+function renderReward() {
+  const c = S.current;
+  if (pendingClaim) {
+    const h = S.heroes.find((x) => x.seat === pendingClaim.seat);
+    const list = pendingClaim.as === 'item' ? h.items : h.skills.filter((k) => !k.start);
+    return `<div class="panel"><h2>${esc(h.name)} is full</h2><p class="mut">Replace which ${pendingClaim.as}? The old one turns into XP.</p>
+      ${list.map((x, i) => `<button style="width:100%;margin:4px 0;text-align:left" data-a="replace" data-i="${i}"><b>${esc(x.name)}</b> <span class="mut">${esc(x.desc)}</span></button>`).join('')}
+      <button style="width:100%" data-a="cancelClaim">Cancel</button></div>`;
+  }
+  const btns = S.heroes.map((h) => `<div class="row" style="margin:4px 0"><span class="grow">${HERO_ICON[h.heroId]} ${esc(h.name)}</span>
+    <button data-a="claim" data-as="item" data-seat="${h.seat}">🎒 Item</button><button data-a="claim" data-as="skill" data-seat="${h.seat}">✨ Skill</button></div>`).join('');
+  return `<div class="panel"><h2>🎁 Victory spoils</h2>${cardHtml(c)}
+    <p class="mut">Take this card as ONE of:</p>${btns}
+    <div class="row" style="margin-top:6px"><button class="grow" data-a="claim" data-as="potion">🧪 Potion</button><button class="grow" data-a="claim" data-as="xp">📈 ${c.xp} XP</button></div></div>`;
+}
+function renderEnd() {
+  const won = S.phase === 'won';
+  return `<div class="panel"><p class="big">${won ? '🏆 Victory!' : '☠️ Defeated'}</p><p style="text-align:center">${won ? `The ${esc(S.dungeons[S.dungeonId].name)} is conquered.` : 'The dungeon claims another party.'}</p>
+  <button class="pri" style="width:100%" data-a="again">Back to lobby</button></div>`;
+}
+function renderGame() {
+  const seated = S.you >= 0;
+  const spect = !seated ? `<div class="panel"><b>You're watching.</b> Rejoin as: ${S.seats.map((x, i) => x ? `<button data-a="claimSeat" data-seat="${i}">${esc(x.name)}</button>` : '').join(' ')}</div>` : '';
+  const main = { turn: renderTurn, reveal: renderReveal, perilChoice: renderPeril, combat: renderCombat, reward: renderReward, won: renderEnd, lost: renderEnd }[S.phase]();
+  return `${topBar()}${spect}${main}
+    <div class="panel"><h3>Party</h3>${S.heroes.map(heroHtml).join('')}</div>
+    <div class="panel"><h3>Log</h3><div class="log">${S.log.slice().reverse().map((l) => `<div>${esc(l)}</div>`).join('')}</div></div>
+    ${rulesHelp()}
+    ${seated && !['won', 'lost'].includes(S.phase) ? '<button class="danger" style="width:100%" data-a="abandon">Abandon game</button>' : ''}`;
+}
+
+function render() {
+  if (!S) return;
+  if (document.activeElement && document.activeElement.id === 'name') { deferred = true; return; }
+  if (S.phase !== 'reward') pendingClaim = null;
+  const y = window.scrollY;
+  $('app').innerHTML = S.phase === 'lobby' ? renderLobby() : renderGame();
+  window.scrollTo(0, y);
+}
+
+document.addEventListener('focusout', (e) => { if (e.target.id === 'name' && deferred) { deferred = false; setTimeout(render, 0); } });
+document.addEventListener('input', (e) => { if (e.target.id === 'name') { myName = e.target.value; localStorage.setItem('dd_name', myName); } });
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-a]'); if (!el || el.disabled) return;
+  const a = el.dataset.a, ds = el.dataset;
+  switch (a) {
+    case 'pickHero': myHero = ds.id; localStorage.setItem('dd_hero', myHero);
+      if (S.you >= 0) act({ t: 'sit', seat: S.you, hero: myHero, name: myName }); else render(); break;
+    case 'sit': if (!myHero) return toast('Pick a hero first'); act({ t: 'sit', seat: +ds.seat, hero: myHero, name: myName }); break;
+    case 'leave': case 'start': case 'explore': case 'descend': case 'fight': case 'flee': case 'resetDice': case 'again': act({ t: a }); break;
+    case 'kick': if (confirm('Remove this player from the seat?')) act({ t: 'kick', seat: +ds.seat }); break;
+    case 'claimSeat': act({ t: 'claimSeat', seat: +ds.seat }); break;
+    case 'dungeon': act({ t: 'dungeon', id: ds.id }); break;
+    case 'enter': act({ t: 'enter', door: +ds.door }); break;
+    case 'choose': act({ t: 'choose', opt: +ds.opt }); break;
+    case 'potion': act({ t: 'potion', seat: +ds.seat }); break;
+    case 'die': { const id = ds.id; sel = sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]; render(); break; }
+    case 'box': {
+      const bi = +ds.box; const b = S.combat.boxes[bi];
+      if (sel.length) { act({ t: 'place', dice: sel, box: bi }); sel = []; }
+      else if (b.dice.length) act({ t: 'clear', box: bi });
+      else toast('Select a die first');
+      break;
+    }
+    case 'combine': act({ t: 'combine', a: sel[0], b: sel[1] }); sel = []; break;
+    case 'skill': act({ t: 'skill', seat: +ds.seat, skill: ds.skill, cost: sel[0], target: sel[1] }); sel = []; break;
+    case 'resolve': {
+      const unc = S.combat.boxes.filter((b) => !b.covered).length;
+      if (unc && S.combat.dice.some((d) => d.box === null) && !confirm(`${unc} box${unc > 1 ? 'es' : ''} still uncovered. Resolve anyway?`)) return;
+      act({ t: 'resolve' }); sel = []; break;
+    }
+    case 'claim': {
+      const as = ds.as;
+      if (as === 'item' || as === 'skill') {
+        const h = S.heroes.find((x) => x.seat === +ds.seat);
+        const count = as === 'item' ? h.items.length : h.skills.length - 1;
+        const cap = as === 'item' ? S.party.itemCap : S.party.skillCap;
+        if (count >= cap) { pendingClaim = { as, seat: h.seat }; render(); return; }
+        act({ t: 'claim', as, seat: h.seat });
+      } else act({ t: 'claim', as });
+      break;
+    }
+    case 'replace': act({ t: 'claim', as: pendingClaim.as, seat: pendingClaim.seat, replace: +ds.i }); pendingClaim = null; break;
+    case 'cancelClaim': pendingClaim = null; render(); break;
+    case 'abandon': if (confirm('Abandon this game and return to the lobby?')) act({ t: 'lobby' }); break;
+  }
+});
+connect();
+</script>
+</body>
+</html>

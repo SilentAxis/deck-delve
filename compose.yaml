@@ -1,0 +1,13 @@
+services:
+  deck-delve:
+    build: .
+    image: deck-delve:latest
+    container_name: deck-delve
+    restart: unless-stopped
+    ports:
+      - "8080:8080"           # open http://<server-ip>:8080 on each phone
+    volumes:
+      - deck-delve-data:/data  # the saved game survives restarts
+    # Behind Traefik? Remove "ports" and see the README for labels.
+volumes:
+  deck-delve-data:

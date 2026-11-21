@@ -1,0 +1,9 @@
+{
+  "name": "deck-delve",
+  "version": "1.0.0",
+  "description": "Self-hosted co-op dice & card dungeon crawl for phones",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "test": "node test/fuzz.js" },
+  "dependencies": { "ws": "^8.18.0" },
+  "license": "AGPL-3.0-only"
+}
