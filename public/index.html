@@ -47,9 +47,18 @@ input,select{font:inherit;color:var(--txt);background:var(--panel2);border:1px s
 .door.closed{align-items:center;justify-content:center;font-size:38px;min-height:110px}
 .card{background:#1a1526;border:1px solid #3d3456;border-radius:12px;padding:10px;margin:6px 0}
 .card .nm{font-weight:800;font-size:17px}
-.art{display:block;width:100%;aspect-ratio:8/5;border-radius:10px;margin:0 0 8px;background:#efe5cf;object-fit:cover;box-shadow:0 2px 8px #0006}
+.art{display:block;width:auto;max-width:100%;height:auto;max-height:min(30vh,300px);margin-left:auto!important;margin-right:auto!important;border-radius:10px;margin:0 0 8px;background:#efe5cf;object-fit:cover;box-shadow:0 2px 8px #0006}
 .door .art{margin:0 0 4px}
-.art.banner{aspect-ratio:16/7}
+.art.banner{max-height:min(22vh,190px)}
+#app{max-width:1280px;margin:0 auto}
+.door .art{max-height:140px}
+@media (min-width:900px){
+  .layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:14px;align-items:start}
+  .layout>aside{position:sticky;top:56px;max-height:calc(100vh - 64px);overflow:auto}
+  .layout>aside .log{max-height:none}
+  .layout .panel{margin-top:10px}
+}
+@media (max-width:899px){.log{max-height:160px}}
 .tag{font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:5px;background:#3d3456;color:var(--mut)}
 .log{font-size:13px;color:var(--mut);max-height:220px;overflow:auto}
 .log div{padding:3px 0;border-bottom:1px solid #2a2338}
@@ -248,11 +257,11 @@ function renderGame() {
   const seated = S.you >= 0;
   const spect = !seated ? `<div class="panel"><b>You're watching.</b> Rejoin as: ${S.seats.map((x, i) => x ? `<button data-a="claimSeat" data-seat="${i}">${esc(x.name)}</button>` : '').join(' ')}</div>` : '';
   const main = { turn: renderTurn, reveal: renderReveal, perilChoice: renderPeril, combat: renderCombat, reward: renderReward, won: renderEnd, lost: renderEnd }[S.phase]();
-  return `${topBar()}${spect}${main}
+  return `${topBar()}${spect}<div class="layout"><main>${main}</main><aside>
     <div class="panel"><h3>Party</h3>${S.heroes.map(heroHtml).join('')}</div>
     <div class="panel"><h3>Log</h3><div class="log">${S.log.slice().reverse().map((l) => `<div>${esc(l)}</div>`).join('')}</div></div>
     ${rulesHelp()}
-    ${seated && !['won', 'lost'].includes(S.phase) ? '<button class="danger" style="width:100%" data-a="abandon">Abandon game</button>' : ''}`;
+    ${seated && !['won', 'lost'].includes(S.phase) ? '<button class="danger" style="width:100%" data-a="abandon">Abandon game</button>' : ''}</aside></div>`;
 }
 
 function render() {
