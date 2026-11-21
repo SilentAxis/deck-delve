@@ -80,6 +80,59 @@ const PERILS = [
   per('Mirror Maze', 1, { agi: 1 }, sk('Reflection', 'boost', 2), ['See through it', 0, M(9, { w: 1, t: 2 })], ['Smash mirrors', 0, S(5, { d: 1, t: 1 })]),
 ];
 
+// ---------- horror decks ----------
+const VAMPIRE = [
+  mon('Vampire Thrall', 1, { str: 1 }, sk('Bloodlust', 'boost', 2, { color: 'str' }), S(5, { d: 1 }), A(4, { d: 1 }), M(4, { t: 1 })),
+  mon('Blood Bat Swarm', 1, { agi: 1 }, sk('Echolocation', 'reroll', 0, { color: 'agi' }), A(9, { w: 1, d: 2 }), M(4, { t: 1 }), S(4, { d: 1 })),
+  mon('Vampire Bride', 2, { mag: 1, agi: 1 }, sk('Mesmerize', 'transmute', 0, { color: 'mag' }), M(5, { a: 1, d: 1 }), A(5, { d: 1 }), M(9, { w: 1, d: 1 })),
+  mon('Nosferatu', 2, { str: 1, hp: 1 }, sk('Night Stalker', 'haste', 2, { min: 4 }), S(5, { a: 1, d: 1 }), A(6, { d: 2 }), S(10, { w: 1, d: 1 }), M(4, { t: 1 })),
+  mon('Werewolf', 2, { str: 1 }, sk('Feral Rage', 'boost', 3, { color: 'str', min: 4 }), S(6, { d: 2 }), A(5, { d: 1 }), S(11, { w: 1, d: 1 })),
+  mon('Blood Hound', 1, { agi: 1 }, sk('Track', 'haste', 1, { color: 'agi' }), A(5, { d: 1 }), S(5, { d: 1 }), A(4, { t: 1 })),
+  mon('Crimson Mist', 1, { mag: 1 }, sk('Mist Form', 'ward', 1, { color: 'mag' }), M(10, { w: 1, d: 2 }), A(4, { t: 1 })),
+  mon('Gaunt Butler', 1, { hp: 1 }, sk('At Your Service', 'heal', 1, { min: 4 }), S(4, { d: 1 }), M(5, { d: 1 }), A(5, { t: 1 })),
+  mon('Mirror Phantom', 2, { mag: 1 }, sk('Reflect', 'ward', 2, { color: 'mag', min: 4 }), M(6, { d: 1 }), M(5, { t: 1 }), A(5, { d: 1 })),
+  mon('Coffin Guardian', 2, { str: 1, hp: 1 }, sk('Sentinel', 'ward', 2, { color: 'str', min: 5 }), S(6, { a: 1, d: 1 }), S(12, { w: 1, d: 2 }), M(4, { t: 1 })),
+  mon('Hunchback Servant', 1, { str: 1 }, sk('Heave', 'boost', 2, { color: 'str' }), S(5, { d: 1 }), S(5, { t: 1 }), A(4, { d: 1 })),
+  mon('Blood Golem', 2, { hp: 2 }, sk('Coagulate', 'heal', 1, { color: 'str', min: 4 }), S(6, { a: 1, d: 1 }), M(6, { d: 1 }), S(10, { w: 1, d: 2 })),
+  per('Falling Chandelier', 1, { agi: 1 }, sk('Reflexes', 'haste', 1, { color: 'agi' }), ['Dive aside', 0, A(6, { d: 2 })], ['Catch it', 1, S(10, { w: 1, d: 1 })]),
+  per('Blood Fountain', 2, { mag: 1 }, sk('Blood Rite', 'summon', 1, { color: 'mag', min: 4 }), ['Cleanse it', 0, M(11, { w: 1, d: 2 })], ['Wade through', 1, S(5, { d: 1, t: 1 })]),
+  per('Haunted Portraits', 1, { mag: 1 }, sk('Stare Down', 'reroll', 0, { color: 'mag' }), ['Ignore the eyes', 0, M(5, { d: 1, t: 1 })], ['Slash the canvas', 1, S(10, { w: 1, d: 1 })]),
+];
+const ZOMBIE = [
+  mon('Rotting Walker', 1, { str: 1 }, sk('Grim Resolve', 'ward', 1, { color: 'str' }), S(5, { d: 1 }), S(4, { d: 1 }), A(4, { t: 1 })),
+  mon('Crawling Torso', 1, { agi: 1 }, sk('Low Blow', 'boost', 2, { color: 'agi' }), A(5, { d: 1 }), S(4, { d: 1 }), M(4, { t: 1 })),
+  mon('Bloated Corpse', 2, { hp: 2 }, sk('Strong Stomach', 'heal', 1, { min: 5 }), S(11, { w: 1, d: 2 }), M(5, { d: 1 }), A(4, { t: 1 })),
+  mon('Zombie Hound', 1, { agi: 1 }, sk('Pounce', 'haste', 1, { color: 'agi' }), A(6, { d: 1 }), A(5, { d: 1 }), S(4, { t: 1 })),
+  mon('Plague Doctor', 2, { mag: 1, hp: 1 }, sk('Remedy', 'heal', 1, { color: 'mag' }), M(5, { a: 1, d: 1 }), M(6, { d: 1 }), A(9, { w: 1, t: 1 })),
+  mon('Grave Digger', 1, { str: 1 }, sk('Dig In', 'ward', 1, { color: 'str', min: 3 }), S(6, { d: 1 }), A(4, { t: 1 }), S(4, { d: 1 })),
+  mon('Corpse Horde', 2, { str: 1, agi: 1 }, sk('Wade In', 'boost', 2), S(12, { w: 1, d: 2 }), A(9, { w: 1, d: 1 }), M(4, { t: 1 })),
+  mon('Bone Horror', 2, { str: 1 }, sk('Shatter', 'reroll', 0, { color: 'str' }), S(6, { a: 1, d: 1 }), S(5, { d: 1 }), A(5, { d: 1 }), M(5, { t: 1 })),
+  mon('Plague Rats', 1, { hp: 1 }, sk('Scatter', 'haste', 1), A(9, { w: 1, d: 2 }), S(4, { t: 1 })),
+  mon('Zombie Knight', 2, { str: 1, hp: 1 }, sk('Iron Will', 'ward', 2, { color: 'str', min: 4 }), S(6, { a: 1, d: 1 }), S(6, { d: 2 }), M(5, { t: 1 })),
+  mon('Gravemind', 2, { mag: 2 }, sk('Hive Mind', 'summon', 1, { color: 'mag', min: 4 }), M(6, { a: 1, d: 1 }), M(12, { w: 1, d: 2 }), A(5, { t: 1 })),
+  mon('Ghoul Matron', 1, { mag: 1 }, sk('Lullaby', 'transmute', 0, { color: 'mag' }), M(5, { d: 1 }), S(5, { d: 1 }), A(5, { t: 1 })),
+  per('Mass Grave', 1, { str: 1 }, sk('Pull Free', 'boost', 2, { color: 'str' }), ['Climb out', 0, S(6, { d: 2 })], ['Edge around', 1, A(10, { w: 1, d: 1 })]),
+  per('Quarantine Gate', 2, { str: 1 }, sk('Leverage', 'boost', 3, { color: 'str', min: 5 }), ['Lift the gate', 0, S(12, { w: 1, t: 2 })], ['Pick the lock', 0, A(6, { t: 2 })]),
+  per('Plague Fog', 1, { hp: 1 }, sk('Hold Breath', 'ward', 1), ['Run through', 0, A(6, { d: 2 })], ['Burn it away', 1, M(10, { w: 1, d: 1 })]),
+];
+const ELDRITCH = [
+  mon('Fishman Raider', 1, { agi: 1 }, sk('Riptide', 'haste', 1, { color: 'agi' }), A(5, { d: 1 }), S(5, { d: 1 }), M(4, { t: 1 })),
+  mon('Fishman Priest', 2, { mag: 1 }, sk('Tide Prayer', 'summon', 1, { color: 'mag', min: 4 }), M(6, { a: 1, d: 1 }), M(5, { d: 1 }), A(9, { w: 1, t: 1 })),
+  mon('Tentacle Horror', 2, { str: 1, hp: 1 }, sk('Constrict', 'ward', 2, { color: 'str', min: 4 }), S(12, { w: 1, d: 2 }), A(6, { d: 1 }), M(5, { t: 1 })),
+  mon('Gibbering Mass', 2, { hp: 2 }, sk('Gibber', 'reroll'), M(6, { d: 2 }), S(10, { w: 1, d: 1 }), A(5, { t: 1 })),
+  mon('Star Spawn', 3, { str: 1, mag: 1 }, sk('Cosmic Might', 'boost', 3, { min: 5 }), S(6, { a: 1, d: 2 }), M(6, { a: 1, d: 1 }), S(13, { w: 1, d: 2 }), A(5, { t: 1 })),
+  mon('Dreaming Cultist', 1, { mag: 1 }, sk('Dark Dream', 'transmute', 0, { color: 'mag' }), M(5, { d: 1 }), A(4, { d: 1 }), M(5, { t: 1 })),
+  mon('Eye of the Deep', 2, { mag: 1 }, sk('Unblinking', 'ward', 1, { color: 'mag' }), M(6, { d: 2 }), M(6, { t: 1 }), A(5, { d: 1 })),
+  mon('Drowned Sailor', 1, { str: 1 }, sk('Sea Legs', 'haste', 1, { color: 'str' }), S(5, { d: 1 }), A(5, { d: 1 }), S(4, { t: 1 })),
+  mon('Abyssal Crab', 2, { str: 1, hp: 1 }, sk('Hard Shell', 'ward', 2, { color: 'str', min: 5 }), S(6, { a: 1, d: 1 }), S(6, { d: 1 }), A(5, { t: 1 })),
+  mon('Mad Prophet', 1, { mag: 1 }, sk('Prophecy', 'reroll', 0, { color: 'mag' }), M(6, { d: 1 }), A(5, { t: 1 }), S(4, { d: 1 })),
+  mon('Lurker Below', 2, { agi: 1, hp: 1 }, sk('Undertow', 'boost', 2, { color: 'agi' }), A(11, { w: 1, d: 2 }), S(6, { d: 1 }), M(5, { t: 1 })),
+  mon('Void Polyp', 2, { mag: 1 }, sk('Phase', 'haste', 2, { color: 'mag', min: 4 }), M(12, { w: 1, d: 2 }), A(6, { d: 1 })),
+  per('Impossible Stairs', 1, { agi: 1 }, sk('Sure Footing', 'reroll', 0, { color: 'agi' }), ['Trust your eyes', 0, A(6, { d: 2 })], ['Feel each step', 1, M(11, { w: 1, d: 1 })]),
+  per('Whispering Idol', 2, { mag: 1 }, sk('Forbidden Words', 'summon', 1, { min: 5 }), ['Resist the whispers', 0, M(6, { d: 2, t: 1 })], ['Smash it', 1, S(11, { w: 1, d: 1 })]),
+  per('Tidal Surge', 1, { str: 1 }, sk('Anchor', 'ward', 1, { color: 'str' }), ['Brace against it', 0, S(12, { w: 1, d: 2 })], ['Swim with it', 0, A(6, { d: 1, t: 1 })]),
+];
+
 // ---------- dungeons ----------
 const MODS = {
   none: { text: 'No special rule.' },
@@ -87,6 +140,16 @@ const MODS = {
   extraDamage: { extraDamage: 1, text: 'Vicious foes: if any box is left uncovered, take 💥1 extra.' },
   perilCost: { perilCost: 1, text: 'Treacherous: every peril option costs ⏳1 extra.' },
   noCombine: { noCombine: 1, text: 'Anti-magic: you cannot combine dice into Empowered dice.' },
+  bloodDrain: { bloodDrain: 1, text: 'Blood drain: at the start of every monster fight, the healthiest hero takes 💥1.' },
+  horde: { horde: 1, text: 'The horde presses in: every monster gains an extra STR Σ box (💥1).' },
+  madness: { madness: 1, text: 'Whispers of madness: 1 random die in every roll becomes a 1.' },
+  madness2: { madness: 2, text: 'Creeping madness: 2 random dice in every roll become 1s.' },
+};
+const modOf = (keys) => {
+  const list = [].concat(keys || 'none');
+  const m = Object.assign({}, ...list.map((k) => MODS[k]));
+  m.text = list.map((k) => MODS[k].text).join(' ');
+  return m;
 };
 const DUNGEONS = {
   warren: { name: 'Goblin Warren', stars: 1, floors: ['none', 'extraTime', 'extraDamage'],
@@ -95,6 +158,16 @@ const DUNGEONS = {
     boss: { name: 'Bone Tyrant', hp: 10, boxes: [M(5, { a: 1, d: 1 }), S(5, { d: 1, k: 1 }), M(6, { d: 2, k: 1 }), A(10, { w: 1, d: 1, k: 1 }), M(12, { w: 1, d: 2, k: 2 })] } },
   forge: { name: 'Ember Forge', stars: 3, floors: ['extraDamage', 'perilCost', 'extraTime'],
     boss: { name: 'Magma Wyrm', hp: 12, boxes: [S(5, { a: 1, d: 1 }), A(5, { a: 1, d: 1 }), S(6, { d: 2, k: 1 }), M(6, { d: 1, k: 1 }), A(12, { w: 1, d: 2, k: 2 }), M(14, { w: 1, d: 2, k: 2 })] } },
+  // horror dungeons: themed decks (plus a few fitting standard monsters and all the standard perils)
+  castle: { name: 'Castle Nocturne', icon: '🧛', stars: 4, deck: VAMPIRE, extras: ['Cave Bats', 'Giant Rat', 'Wailing Banshee', 'Living Shadow'],
+    floors: ['extraTime', 'bloodDrain', ['bloodDrain', 'extraTime']], bossMod: 'none',
+    boss: { name: 'Lord Malvoren', hp: 12, boxes: [M(5, { a: 1, d: 1 }), A(5, { d: 1, k: 1 }), S(5, { d: 2, k: 1 }), M(10, { w: 1, d: 1, k: 1 }), A(12, { w: 1, d: 2, k: 2 }), S(12, { w: 1, d: 2, k: 2 })] } },
+  necropolis: { name: 'Plaguewood Necropolis', icon: '🧟', stars: 5, deck: ZOMBIE, extras: ['Giant Rat', 'Crypt Ghoul', 'Shambler', 'Rattling Skeleton'],
+    floors: ['horde', ['horde', 'extraTime'], ['horde', 'extraDamage']], bossMod: 'none',
+    boss: { name: 'The Plague Colossus', hp: 13, boxes: [S(5, { a: 1, d: 1 }), A(5, { d: 2, k: 1 }), M(5, { d: 1, k: 1 }), S(12, { w: 1, d: 2, k: 2 }), A(12, { w: 1, d: 2, k: 2 }), M(10, { w: 1, d: 1, k: 1 })] } },
+  rlyeh: { name: "Sunken R'lyeh", icon: '🐙', stars: 6, deck: ELDRITCH, extras: ['Ooze', 'Hooded Cultist', 'Living Shadow', 'Will-o-Wisp'],
+    floors: ['madness', ['madness', 'extraTime'], ['madness2', 'extraDamage']], bossMod: 'madness',
+    boss: { name: 'Cthulhu, the Dreamer', hp: 13, boxes: [M(5, { a: 1, d: 1 }), M(6, { d: 2, k: 1 }), S(5, { d: 2, k: 1 }), M(12, { w: 1, d: 2, k: 2 }), S(13, { w: 1, d: 2, k: 2 }), A(12, { w: 1, d: 2, k: 2 })] } },
 };
 
 // ---------- state ----------
@@ -103,7 +176,7 @@ function newState() {
 }
 function log(s, msg) { s.log.push(msg); if (s.log.length > 80) s.log.splice(0, s.log.length - 80); }
 const uid = (s) => 'x' + (s.seq++);
-const mod = (s) => (s.floor >= 1 && s.floor <= 3 ? MODS[DUNGEONS[s.dungeonId].floors[s.floor - 1]] : MODS.none);
+const mod = (s) => (s.floor >= 1 && s.floor <= 3 ? modOf(DUNGEONS[s.dungeonId].floors[s.floor - 1]) : modOf(DUNGEONS[s.dungeonId].bossMod));
 const itemCap = (s) => s.party.level + 1;
 const skillCap = (s) => s.party.level;
 
@@ -203,7 +276,15 @@ function rollDice(s, only) {
   return dice;
 }
 function setupCombat(s, boxes, only, boss, round) {
-  s.combat = { boxes: boxes.map((b) => ({ ...b, dice: [], covered: false })), dice: rollDice(s, only), only: only || null,
+  const m = mod(s);
+  if (m.bloodDrain && !boss && !only) { damageParty(s, 1, 'Blood drain'); if (s.phase === 'lost') return; }
+  const dice = rollDice(s, only);
+  if (m.madness) {
+    const hit = shuffle(dice.slice()).slice(0, m.madness);
+    hit.forEach((d) => { d.value = 1; });
+    if (hit.length) log(s, `🌀 Madness twists ${hit.length} ${hit.length > 1 ? 'dice' : 'die'} to 1.`);
+  }
+  s.combat = { boxes: boxes.map((b) => ({ ...b, dice: [], covered: false })), dice, only: only || null,
     used: {}, ward: 0, haste: 0, boss: !!boss, round: round || 1 };
   s.phase = 'combat';
 }
@@ -212,8 +293,10 @@ function startEncounter(s, idx) {
   s.doors.splice(idx, 1);
   s.current = door.card;
   if (door.card.type === 'monster') {
-    setupCombat(s, door.card.boxes.map((b) => scaleBox(b, s.floor, np(s))));
+    const boxes = door.card.boxes.map((b) => scaleBox(b, s.floor, np(s)));
+    if (mod(s).horde) boxes.push(scaleBox(S(5, { w: 1, d: 1 }), s.floor, np(s)));
     log(s, `⚔️ The party fights the ${door.card.name}!`);
+    setupCombat(s, boxes);
   } else {
     s.phase = 'perilChoice';
     log(s, `⚠️ Peril: ${door.card.name}. Choose how to deal with it.`);
@@ -348,6 +431,11 @@ function descend(s) {
   }
 }
 
+function deckFor(id) {
+  const D = DUNGEONS[id];
+  if (!D.deck) return [...MONSTERS, ...PERILS];
+  return [...D.deck, ...MONSTERS.filter((c) => D.extras.includes(c.name)), ...PERILS];
+}
 const bossBoxes = (s) => DUNGEONS[s.dungeonId].boss.boxes.map((b) => scaleBox(b, 1, np(s)));
 
 function startGame(s) {
@@ -359,7 +447,7 @@ function startGame(s) {
     return { seat: x.seat, name: x.name || H.name, heroId: x.hero, cls: H.name, base: { ...H[mode] }, damage: 0, items: [], skills: [], start: { id: 'start', ...H.start } };
   });
   s.party = { level: 1, xp: 0, potions: 1 };
-  s.deck = shuffle([...MONSTERS, ...PERILS].map((c) => ({ ...clone(c), id: uid(s) })));
+  s.deck = shuffle(deckFor(s.dungeonId).map((c) => ({ ...clone(c), id: uid(s) })));
   Object.assign(s, { discard: [], doors: [], floor: 1, stairs: false, stairsTokens: 0, current: null, combat: null, boss: null, phase: 'turn', turn: 1, log: [] });
   log(s, `🏰 ${s.heroes.map((h) => `${h.name} the ${h.cls}`).join(' & ')} enter the ${DUNGEONS[s.dungeonId].name}. ${mod(s).text}`);
 }
@@ -471,7 +559,7 @@ function view(s, token, online) {
     phase: s.phase, you: s.seats.findIndex((x) => x && x.token === token), log: s.log.slice(-25),
     seats: s.seats.map((x) => x && { name: x.name, hero: x.hero, online: !!(x.token && online.has(x.token)) }),
     heroCatalog: Object.fromEntries(Object.entries(HEROES).map(([k, h]) => [k, { name: h.name, solo: h.solo, duo: h.duo, start: { name: h.start.name, desc: skillDesc(h.start) } }])),
-    dungeons: Object.fromEntries(Object.entries(DUNGEONS).map(([k, d]) => [k, { name: d.name, stars: d.stars, boss: d.boss.name, floors: d.floors.map((f) => MODS[f].text) }])),
+    dungeons: Object.fromEntries(Object.entries(DUNGEONS).map(([k, d]) => [k, { name: d.name, icon: d.icon || '', stars: d.stars, boss: d.boss.name, floors: d.floors.map((f) => modOf(f).text), deck: d.deck ? d.deck.length + d.extras.length + PERILS.length : MONSTERS.length + PERILS.length, horror: !!d.deck }])),
     dungeonId: s.dungeonId,
   };
   if (s.phase === 'lobby' || !s.heroes) return v;
@@ -495,4 +583,4 @@ function view(s, token, online) {
   return v;
 }
 
-module.exports = { newState, apply, view, HEROES, DUNGEONS, MONSTERS, PERILS };
+module.exports = { newState, apply, view, HEROES, DUNGEONS, MONSTERS, PERILS, deckFor };

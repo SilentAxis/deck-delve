@@ -46,6 +46,19 @@ WebSockets (`/ws`) go through Traefik with no extra configuration.
 
 There is one shared game and no login, so anyone who can reach the page can take a seat, kick players or abandon the game. The server limits message size, message rate and the number of connections, but it is meant for people you trust. For public hosting, put it behind your reverse proxy's basic auth or an IP allow-list.
 
+## Dungeons
+
+| Dungeon | Difficulty | Theme and special rules |
+|---|---|---|
+| Goblin Warren | ★ | Gentle start |
+| Sunken Crypt | ★★ | Twisting halls, vicious foes, an anti-magic floor |
+| Ember Forge | ★★★ | Vicious foes, treacherous perils |
+| 🧛 Castle Nocturne | ★★★★ | Vampires. **Blood drain**: the healthiest hero takes 💥1 at the start of every monster fight. Boss: Lord Malvoren |
+| 🧟 Plaguewood Necropolis | ★★★★★ | Zombies. **The horde**: every monster gains an extra STR Σ box. Boss: The Plague Colossus |
+| 🐙 Sunken R'lyeh | ★★★★★★ | Cosmic horror. **Madness**: random dice in every roll turn into 1s, even in the boss fight. Boss: Cthulhu, the Dreamer |
+
+Each horror dungeon has its own deck of 15 themed cards. It also uses a few fitting standard monsters and the standard perils.
+
 ## How to play
 
 1. **Set up.** Each phone picks a hero and a seat. Someone picks the dungeon (★ to ★★★). Tap **Start**.

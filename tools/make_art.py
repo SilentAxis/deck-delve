@@ -263,10 +263,15 @@ def face(p, hx, hy, r, kind='angry', look=0):
         p.line(teeth, w=1.0, passes=1, j=0.3)
     elif kind == 'grim':
         p.line([(hx - r * 0.35 + look, hy + r * 0.45), (hx + r * 0.35 + look, hy + r * 0.4)], w=1.0, passes=1)
+    elif kind == 'fangs':
+        p.line([(hx - r * 0.4 + look, hy + r * 0.4), (hx + look, hy + r * 0.5), (hx + r * 0.4 + look, hy + r * 0.4)], w=1.1, passes=1)
+        for sgn in (-1, 1):
+            x = hx + sgn * r * 0.2 + look
+            p.shape([(x - r * 0.08, hy + r * 0.45), (x, hy + r * 0.78), (x + r * 0.08, hy + r * 0.45)], w=0.9)
 
 
 def humanoid(p, cx, g, h, build='normal', head='plain', weapon=None, cloak=False, hunch=0.0, skeleton=False,
-             armor=False, tail=False, wing=False, face_kind='angry', legs='normal', robe=False, shade=0.35):
+             armor=False, tail=False, wing=False, face_kind='angry', legs='normal', robe=False, shade=0.35, arms='normal'):
     r = h * (0.1 if build == 'bulky' else 0.115)
     sw = h * {'thin': 0.13, 'normal': 0.17, 'bulky': 0.25}[build]
     hipy = g - h * 0.44
@@ -323,14 +328,23 @@ def humanoid(p, cx, g, h, build='normal', head='plain', weapon=None, cloak=False
     aw = lw * 1.5
     lhand = (cx - sw - h * 0.06, hipy + h * 0.02)
     rhand = (cx + sw + h * 0.16, shy - h * 0.06) if weapon else (cx + sw + h * 0.06, hipy)
-    if skeleton:
+    if arms == 'forward':  # shambling, arms reaching out
+        lhand, rhand = (cx + sw + h * 0.34, shy + h * 0.1), (cx + sw + h * 0.38, shy + h * 0.02)
+        limb(p, [(cx - sw * 0.6, shy + 2), (cx + sw * 0.6, shy + h * 0.12), lhand], aw, hatch_op=shade + 0.2)
+        limb(p, [(cx + sw, shy + 2), (cx + sw + h * 0.18, shy + h * 0.06), rhand], aw, hatch_op=shade)
+        for hand in (lhand, rhand):
+            p.shape(ell(hand[0], hand[1], aw * 0.55, aw * 0.5, 8), w=1.1)
+            for k in range(3):
+                p.line([(hand[0] + aw * 0.4, hand[1] - 2 + k * 2.5), (hand[0] + aw * 1.1, hand[1] - 1 + k * 3)], w=0.9, passes=1)
+    elif skeleton:
         p.line([(cx - sw, shy), (cx - sw - h * 0.05, (shy + hipy) / 2), lhand], w=2.0)
         p.line([(cx + sw, shy), (cx + sw + h * 0.12, shy + h * 0.1), rhand], w=2.0)
     else:
         limb(p, [(cx - sw, shy + 2), (cx - sw - h * 0.06, (shy + hipy) / 2), lhand], aw, hatch_op=shade)
         limb(p, [(cx + sw, shy + 2), (cx + sw + h * 0.13, shy + h * 0.11), rhand], aw, hatch_op=shade)
-    for hand in (lhand, rhand):
-        p.shape(ell(hand[0], hand[1], aw * 0.55, aw * 0.5, 8), w=1.1)
+    if arms != 'forward':
+        for hand in (lhand, rhand):
+            p.shape(ell(hand[0], hand[1], aw * 0.55, aw * 0.5, 8), w=1.1)
     if weapon:
         weapon_draw(p, weapon, rhand, h)
     # head
@@ -341,6 +355,52 @@ def humanoid(p, cx, g, h, build='normal', head='plain', weapon=None, cloak=False
         hole = ell(hx, hy + r * 0.15, r * 0.8, r * 0.95, 14)
         p.fill(hole, color=INK, op=0.75)
         face(p, hx, hy, r, 'glow')
+        return
+    if head in ('wolf', 'fish'):
+        if head == 'wolf':
+            for e in (-0.5, 0.2):
+                p.shape([(hx + r * e - r * 0.35, hy - r * 0.6), (hx + r * e, hy - r * 1.9), (hx + r * e + r * 0.4, hy - r * 0.6)], w=1.2,
+                        hatch=dict(angle=45, gap=2.4, op=0.5))
+        else:
+            fin = [(hx - r * 0.7, hy + r * 0.5), (hx - r * 1.6, hy + r * 0.1), (hx - r * 1.3, hy - r * 0.5), (hx - r * 1.5, hy - r * 0.9),
+                   (hx - r * 0.8, hy - r * 1.0), (hx - r * 0.2, hy - r * 0.7)]
+            p.shape(fin, w=1.1, hatch=dict(angle=80, gap=2, op=0.45))
+        sn = ell(hx + r * 0.5, hy + r * 0.1, r * 1.45, r * 0.85, 18)
+        p.shape(sn, w=1.5, hatch=dict(angle=40, gap=3.2, op=shade + 0.1))
+        if head == 'fish':
+            p.shape(ell(hx + r * 0.4, hy - r * 0.25, r * 0.42, r * 0.42, 12), w=1.2)
+            p.dot(hx + r * 0.5, hy - r * 0.2, r * 0.2)
+            for k in range(3):
+                p.line(ell(hx - r * 0.45 - k * r * 0.22, hy + r * 0.2, r * 0.18, r * 0.45, 8, -1.2, 1.2), w=0.9, passes=1)
+            p.line([(hx + r * 0.7, hy + r * 0.55), (hx + r * 1.4, hy + r * 0.25), (hx + r * 1.9, hy + r * 0.3)], w=1.2, passes=1)
+        else:
+            p.dot(hx + r * 0.3, hy - r * 0.3, r * 0.14)
+            p.dot(hx + r * 1.85, hy - r * 0.05, r * 0.12)
+            for i in range(4):
+                fx = hx + r * (0.9 + i * 0.25)
+                p.shape([(fx, hy + r * 0.42), (fx + r * 0.08, hy + r * 0.75), (fx + r * 0.16, hy + r * 0.42)], w=0.8)
+        return
+    if head == 'beak':
+        p.shape(ell(hx, hy, r, r * 1.05, 16), w=1.5, hatch=dict(angle=130, gap=3, op=0.45))
+        p.shape([(hx + r * 0.5, hy - r * 0.15), (hx + r * 2.6, hy + r * 0.9), (hx + r * 0.6, hy + r * 0.6)], w=1.4, hatch=dict(angle=20, gap=2.4, op=0.35))
+        for sx in (-0.3, 0.35):
+            p.shape(ell(hx + r * sx, hy - r * 0.15, r * 0.28, r * 0.28, 10), w=1.2, hatch=dict(angle=45, gap=1.6, op=0.8, cross=1))
+        p.shape(ell(hx, hy - r * 0.85, r * 1.9, r * 0.32, 16), w=1.3, hatch=dict(angle=10, gap=2.4, op=0.55))
+        p.shape([(hx - r * 0.9, hy - r * 0.9), (hx - r * 0.85, hy - r * 2.0), (hx + r * 0.85, hy - r * 2.0), (hx + r * 0.9, hy - r * 0.9)], w=1.3,
+                hatch=dict(angle=70, gap=2.4, op=0.6, cross=1), sharp=True)
+        return
+    if head == 'squid':
+        for i in range(6):
+            x0 = hx - r * 0.75 + i * r * 0.3
+            pts = [(x0 + math.sin(k * 0.9 + i) * r * 0.25, hy + r * 0.4 + k * r * 0.45) for k in range(7)]
+            p.line(pts, w=r * 0.28, passes=1, op=0.45)
+            p.line(pts, w=1.1)
+        dome = ell(hx, hy - r * 0.45, r * 1.25, r * 1.4, 18)
+        p.shape(dome, w=1.6, hatch=dict(angle=120, gap=2.8, op=0.4))
+        p.hatch(ell(hx + r * 0.3, hy - r * 0.45, r * 0.9, r * 1.3, 12), angle=40, gap=2, op=0.35)
+        for sx in (-0.45, 0.45):
+            p.el.append(f'<ellipse cx="{f(hx + r * sx)}" cy="{f(hy + r * 0.05)}" rx="{f(r * 0.25)}" ry="{f(r * 0.13)}" fill="#fffaf0"/>')
+            p.glow(hx + r * sx, hy + r * 0.05, r * 0.6)
         return
     if head == 'snout':
         sn = ell(hx + r * 0.5, hy + r * 0.1, r * 1.45, r * 0.85, 18)
@@ -1138,6 +1198,671 @@ def _(p):
     p.glow(305, 70, 26)
     wing = [(140, 105), (110, 40), (80, 20), (96, 60), (70, 50), (90, 85), (60, 85), (100, 110)]
     p.shape(wing, w=1.4, hatch=dict(angle=70, gap=3, op=0.35))
+
+
+
+# ---------------- horror helpers ----------------
+def tentacle(p, x, y, length, ang, curl=1.0, width=10, op=0.4):
+    a = math.radians(ang)
+    pts = [(x, y)]
+    seg = length / 12
+    for i in range(12):
+        a += curl * (0.05 + i * 0.035)
+        x, y = x + seg * math.cos(a), y + seg * math.sin(a)
+        pts.append((x, y))
+    left, right = [], []
+    for i, (px, py) in enumerate(pts):
+        q0 = pts[max(0, i - 1)]
+        q1 = pts[min(len(pts) - 1, i + 1)]
+        dx, dy = q1[0] - q0[0], q1[1] - q0[1]
+        L = math.hypot(dx, dy) or 1
+        nx, ny = -dy / L, dx / L
+        w = width * (1 - 0.9 * i / (len(pts) - 1)) / 2
+        left.append((px + nx * w, py + ny * w))
+        right.append((px - nx * w, py - ny * w))
+    band = left + right[::-1]
+    p.shape(band, w=1.3, hatch=dict(angle=random.choice([30, 120]), gap=2.6, op=op))
+    for i in range(1, 10, 2):
+        px, py = right[i]
+        p.shape(ell(px, py, width * 0.12 * (1 - i / 12), width * 0.12 * (1 - i / 12), 8), w=0.7)
+    return pts
+
+
+def big_eye(p, cx, cy, rx, ry):
+    almond = ell(cx, cy, rx, ry, 14, math.pi, 2 * math.pi) + ell(cx, cy, rx, ry, 14, 0, math.pi)[1:-1]
+    p.shape(almond, w=1.8)
+    for k in range(10):
+        t = math.pi * (0.1 + k * 0.08)
+        p.line([(cx + rx * math.cos(t) * 0.95, cy + ry * math.sin(t) * 0.95), (cx + rx * math.cos(t) * 0.7, cy + ry * math.sin(t) * 0.55)], w=0.6, passes=1, op=0.5)
+    p.shape(ell(cx, cy, ry * 0.85, ry * 0.85, 16), w=1.4, hatch=dict(angle=30, gap=1.8, op=0.55, cross=1))
+    p.fill(ell(cx, cy, ry * 0.18, ry * 0.7, 10), color=INK, op=0.95)
+    p.dot(cx - ry * 0.35, cy - ry * 0.35, ry * 0.14, color=PAPER, op=1)
+
+
+def coffin(p, cx, cy, w, h, ang=0.0, open_lid=False):
+    pts = [(-w * 0.35, -h / 2), (w * 0.35, -h / 2), (w / 2, -h * 0.25), (w * 0.3, h / 2), (-w * 0.3, h / 2), (-w / 2, -h * 0.25)]
+    c, s_ = math.cos(ang), math.sin(ang)
+    pts = [(cx + x * c - y * s_, cy + x * s_ + y * c) for x, y in pts]
+    p.shape(pts, w=1.6, hatch=dict(angle=80, gap=3, op=0.4), sharp=True)
+    mid = lambda a, b: ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+    top, bot = mid(pts[0], pts[1]), mid(pts[3], pts[4])
+    p.line([lerp(top, bot, 0.2), lerp(top, bot, 0.55)], w=1.6)
+    l1, l2 = lerp(top, bot, 0.32), (0, 0)
+    p.line([(l1[0] - w * 0.15 * c, l1[1] - w * 0.15 * s_), (l1[0] + w * 0.15 * c, l1[1] + w * 0.15 * s_)], w=1.6)
+
+
+def moon_window(p, x, y, r=34):
+    arch = [(x - r, y + r * 1.2), (x - r, y)] + ell(x, y, r, r, 12, math.pi, 2 * math.pi) + [(x + r, y), (x + r, y + r * 1.2)]
+    p.shape(arch, w=1.6, back=True, hatch=dict(angle=60, gap=2.2, op=0.6, cross=1))
+    p.glow(x + 6, y - 2, r * 0.9)
+    p.el.append(f'<circle cx="{f(x + 6)}" cy="{f(y - 2)}" r="{f(r * 0.45)}" fill="{PAPER}"/>')
+    p.line(ell(x + 6, y - 2, r * 0.45, r * 0.45, 14), w=1.0, closed=True)
+    p.line([(x, y - r), (x, y + r * 1.2)], w=1.6)
+    p.line([(x - r, y + r * 0.2), (x + r, y + r * 0.2)], w=1.6)
+
+
+def tombstone(p, x, g, w=26, h=40, tilt=0.0):
+    pts = [(x - w / 2, g), (x - w / 2, g - h + w / 2)] + ell(x, g - h + w / 2, w / 2, w / 2, 10, math.pi, 2 * math.pi) + [(x + w / 2, g - h + w / 2), (x + w / 2, g)]
+    pts = [(px + (g - py) * tilt, py) for px, py in pts]
+    p.shape(pts, w=1.3, hatch=dict(angle=80, gap=3.4, op=0.3))
+    p.line([(x - 6 + (h * 0.5) * tilt, g - h * 0.55), (x + 6 + (h * 0.5) * tilt, g - h * 0.55)], w=1.0, passes=1)
+    p.line([(x + (h * 0.7) * tilt, g - h * 0.75), (x + (h * 0.3) * tilt, g - h * 0.3)], w=1.0, passes=1)
+
+
+def water(p, top=150, rows=4, op=0.55):
+    p.fill([(-5, top), (325, top), (325, 205), (-5, 205)], color=PAPER)
+    p.hatch([(-5, top), (325, top), (325, 205), (-5, 205)], angle=5, gap=5, op=0.25)
+    for r_ in range(rows):
+        y = top + r_ * 12
+        p.line([(-5 + k * 22, y + 3 * math.sin(k + r_)) for k in range(16)], w=0.9, passes=1, op=op)
+
+
+def flies(p, x, y, n=6, spread=30):
+    for _ in range(n):
+        fx, fy = x + random.uniform(-spread, spread), y + random.uniform(-spread * 0.6, spread * 0.6)
+        p.dot(fx, fy, 1.3)
+        p.line([(fx - 3, fy - 2), (fx, fy), (fx + 3, fy - 2)], w=0.5, passes=1, op=0.6)
+
+
+def ruins(p, n=5):
+    for i in range(n):
+        x = 15 + i * 72 + random.uniform(-10, 10)
+        hgt = random.uniform(60, 130)
+        lean = random.uniform(-0.35, 0.35)
+        pts = [(x, 172), (x + 26, 172), (x + 26 + hgt * lean, 172 - hgt), (x + 4 + hgt * lean, 172 - hgt * 1.08)]
+        p.shape(pts, w=1.3, back=True, hatch=dict(angle=random.choice([20, 70, 110]), gap=3.4, op=0.35), sharp=True)
+        for k in range(3):
+            yy = 172 - hgt * (k + 1) / 4
+            p.line([(x + (172 - yy) * lean, yy), (x + 26 + (172 - yy) * lean, yy - 6)], w=0.7, back=True, passes=1, op=0.5)
+
+
+# ---------------- Castle Nocturne (vampires) ----------------
+@art('Vampire Thrall')
+def _(p):
+    bricks(p); floor(p)
+    moon_window(p, 260, 60)
+    humanoid(p, 140, 172, 120, build='thin', head='plain', face_kind='fangs', hunch=0.3, arms='forward', shade=0.4)
+
+
+@art('Blood Bat Swarm')
+def _(p):
+    moon_window(p, 160, 70, 50)
+    floor(p)
+    for (x, y, sc) in [(160, 110, 2.2), (70, 60, 1.3), (250, 50, 1.2), (100, 140, 1.0), (230, 135, 1.1), (40, 110, 0.8), (290, 95, 0.9), (190, 40, 0.8)]:
+        bat(p, x, y, sc)
+    for k in range(5):
+        p.line([(140 + k * 10, 130), (138 + k * 10, 140)], w=0.8, passes=1, op=0.6)
+
+
+@art('Vampire Bride')
+def _(p):
+    bricks(p); floor(p)
+    for x in (50, 270):
+        p.shape([(x - 6, 172), (x - 6, 135), (x + 6, 135), (x + 6, 172)], w=1, hatch=dict(angle=90, gap=2.5, op=0.3), sharp=True)
+        p.glow(x, 126, 16); p.shape([(x, 118), (x + 3, 129), (x - 3, 129)], w=0.9)
+    humanoid(p, 160, 172, 130, build='thin', head='plain', face_kind='fangs', robe=True, shade=0.2)
+    for k in range(7):
+        p.line([(146 + k * 4, 34), (136 + k * 5, 60), (130 + k * 6, 92)], w=0.9, passes=1, op=0.65)
+
+
+@art('Nosferatu')
+def _(p):
+    bricks(p); floor(p)
+    p.smudge(220, 110, 70, 60, op=0.3, back=False)
+    humanoid(p, 150, 174, 150, build='thin', head='ears', face_kind='fangs', hunch=0.5, arms='forward', cloak=True, shade=0.45)
+
+
+@art('Werewolf')
+def _(p):
+    floor(p, cracks=False)
+    p.glow(255, 40, 30); p.line(ell(255, 40, 18, 18, 16), w=1.0, closed=True)
+    for x in (25, 290):
+        p.line([(x, 172), (x + 3, 70), (x - 18, 95)], w=1.1, back=True, op=0.5)
+    humanoid(p, 150, 174, 150, build='bulky', head='wolf', hunch=0.4, shade=0.5, tail=True)
+    for k in range(8):
+        p.line([(118 + k * 8, 76), (114 + k * 8, 84)], w=0.8, passes=1, op=0.6)
+
+
+@art('Blood Hound')
+def _(p):
+    bricks(p); floor(p)
+    beast(p, 155, 172, 140, 95, kind='wolf')
+    for k in range(4):
+        p.line([(222 + k * 4, 128), (223 + k * 4, 140)], w=1.4, passes=1, op=0.7)
+
+
+@art('Crimson Mist')
+def _(p):
+    bricks(p); floor(p)
+    for (x, y, r) in [(160, 110, 55), (95, 135, 32), (230, 130, 38), (180, 70, 30)]:
+        for k in range(4):
+            p.line(ell(x, y, r - k * 9, (r - k * 9) * 0.6, 18, 0.3, 1.9 * math.pi), w=0.9, passes=1, op=0.5)
+        p.hatch(ell(x, y, r, r * 0.6, 16), angle=random.choice([25, 155]), gap=4, op=0.25)
+    p.el.append('<ellipse cx="148" cy="100" rx="6" ry="3" fill="#fffaf0"/><ellipse cx="172" cy="100" rx="6" ry="3" fill="#fffaf0"/>')
+    p.line([(145, 118), (160, 126), (175, 118)], w=1.2, passes=1)
+
+
+@art('Gaunt Butler')
+def _(p):
+    bricks(p); floor(p)
+    humanoid(p, 150, 172, 135, build='thin', head='plain', face_kind='grim', weapon='staff', shade=0.5)
+
+
+@art('Mirror Phantom')
+def _(p):
+    bricks(p); floor(p)
+    frame = [(100, 172), (100, 50), (160, 20), (220, 50), (220, 172)]
+    p.shape(frame, w=2.4, hatch=dict(angle=100, gap=5, op=0.2), sharp=True)
+    inner = [(112, 164), (112, 56), (160, 32), (208, 56), (208, 164)]
+    p.fill(inner, color=INK, op=0.25)
+    p.line(inner, w=1.1, closed=True)
+    ghost = [(160, 60), (182, 72), (186, 110), (196, 150), (180, 140), (170, 155), (158, 140), (146, 155), (134, 142), (138, 110), (140, 72)]
+    p.shape(ghost, w=1.2, hatch=dict(angle=110, gap=5, op=0.15))
+    p.fill(ell(153, 82, 3.4, 4.5, 10), color=INK); p.fill(ell(168, 82, 3.4, 4.5, 10), color=INK)
+    p.fill(ell(160, 96, 4, 6, 10), color=INK)
+    for k in range(5):
+        p.line([(120 + k * 18, 60 + k * 9), (128 + k * 18, 50 + k * 9)], w=0.7, passes=1, op=0.5)
+
+
+@art('Coffin Guardian')
+def _(p):
+    bricks(p); floor(p)
+    coffin(p, 255, 120, 60, 110, ang=0.08)
+    humanoid(p, 130, 172, 140, head='helm', weapon='axe', armor=True, cloak=True, shade=0.5)
+
+
+@art('Hunchback Servant')
+def _(p):
+    bricks(p); floor(p)
+    humanoid(p, 150, 174, 110, build='bulky', head='plain', face_kind='grim', hunch=0.9, weapon='staff', shade=0.45)
+    p.shape(ell(118, 92, 26, 18, 14), w=1.4, hatch=dict(angle=60, gap=2.6, op=0.45))
+
+
+@art('Blood Golem')
+def _(p):
+    bricks(p); floor(p)
+    p.smudge(160, 174, 80, 8, op=0.3)
+    blob(p, 160, 120, 60, 52, drips=9, eyes=2, op=0.55)
+    for s_ in (-1, 1):
+        limb(p, [(160 + s_ * 50, 110), (160 + s_ * 78, 135), (160 + s_ * 82, 168)], 22, hatch_op=0.55)
+    for x in (140, 180):
+        limb(p, [(x, 160), (x, 172)], 22, hatch_op=0.55)
+
+
+@art('Falling Chandelier')
+def _(p):
+    bricks(p); floor(p)
+    cx, cy = 160, 95
+    p.line([(cx, 0), (cx + 4, 40)], w=1.2, passes=1, op=0.6)
+    p.line([(cx + 4, 40), (cx + 10, 55)], w=1.2, passes=1, op=0.35)
+    p.shape(ell(cx, cy, 90, 18, 26), w=2.0, hatch=dict(angle=10, gap=3, op=0.3))
+    p.line(ell(cx, cy, 70, 12, 26), w=1.2, closed=True)
+    for k in range(7):
+        x = cx - 75 + k * 25
+        p.shape([(x - 4, cy - 2), (x - 4, cy - 24), (x + 4, cy - 24), (x + 4, cy - 2)], w=1.0, sharp=True)
+        p.glow(x, cy - 32, 12)
+        p.shape([(x, cy - 40), (x + 3, cy - 28), (x - 3, cy - 28)], w=0.8)
+    for k in range(6):
+        p.line([(cx - 90 + k * 36, cy + 30), (cx - 86 + k * 36, cy + 46)], w=0.9, passes=1, op=0.5)
+    p.smudge(cx, 172, 100, 8, op=0.35)
+
+
+@art('Blood Fountain')
+def _(p):
+    bricks(p); floor(p)
+    basin = [(70, 140), (250, 140), (235, 172), (85, 172)]
+    p.shape(basin, w=1.8, hatch=dict(angle=80, gap=4, op=0.3), sharp=True)
+    p.shape(ell(160, 140, 90, 12, 24), w=1.6, hatch=dict(angle=0, gap=1.8, op=0.75, cross=1))
+    p.shape([(152, 140), (152, 80), (168, 80), (168, 140)], w=1.4, hatch=dict(angle=90, gap=3, op=0.3), sharp=True)
+    p.shape(ell(160, 78, 34, 8, 18), w=1.4, hatch=dict(angle=0, gap=2, op=0.6))
+    sk = ell(160, 62, 12, 11, 12); p.shape(sk, w=1.2)
+    p.fill(ell(156, 61, 2.4, 2.8, 8), color=INK); p.fill(ell(164, 61, 2.4, 2.8, 8), color=INK)
+    for s_ in (-1, 1):
+        p.line([(160 + s_ * 30, 80), (160 + s_ * 50, 100), (160 + s_ * 56, 135)], w=2.2, passes=1, op=0.7)
+        for k in range(3):
+            p.dot(160 + s_ * (52 + k * 2), 110 + k * 9, 2)
+
+
+@art('Haunted Portraits')
+def _(p):
+    bricks(p); floor(p)
+    for i, (x, y, w_, h_) in enumerate([(30, 40, 70, 90), (125, 25, 70, 100), (220, 45, 70, 85)]):
+        p.shape([(x, y), (x + w_, y), (x + w_, y + h_), (x, y + h_)], w=2.2, hatch=dict(angle=0, gap=6, op=0.15), sharp=True)
+        p.line([(x + 7, y + 7), (x + w_ - 7, y + 7), (x + w_ - 7, y + h_ - 7), (x + 7, y + h_ - 7)], w=1.0, closed=True, passes=1)
+        cx = x + w_ / 2
+        p.shape(ell(cx, y + h_ * 0.38, w_ * 0.2, h_ * 0.17, 14), w=1.1, hatch=dict(angle=120, gap=3, op=0.2))
+        p.shape([(cx - w_ * 0.3, y + h_ - 8), (cx - w_ * 0.18, y + h_ * 0.6), (cx + w_ * 0.18, y + h_ * 0.6), (cx + w_ * 0.3, y + h_ - 8)], w=1.1,
+                hatch=dict(angle=60, gap=2.6, op=0.45))
+        look = 3 if i == 0 else (-3 if i == 2 else 0)
+        for sx in (-0.08, 0.08):
+            p.el.append(f'<ellipse cx="{f(cx + w_ * sx * 1.4)}" cy="{f(y + h_ * 0.36)}" rx="3.4" ry="2" fill="#fffaf0"/>')
+            p.dot(cx + w_ * sx * 1.4 + look * 0.4, y + h_ * 0.36, 1.2)
+
+
+@art('Lord Malvoren')
+def _(p):
+    bricks(p); floor(p)
+    moon_window(p, 160, 50, 40)
+    for s_ in (-1, 1):
+        cape = [(160 + s_ * 20, 60), (160 + s_ * 80, 40), (160 + s_ * 120, 70), (160 + s_ * 112, 110), (160 + s_ * 125, 150),
+                (160 + s_ * 95, 140), (160 + s_ * 80, 172), (160 + s_ * 30, 172)]
+        p.shape(cape, w=1.6, hatch=dict(angle=70 if s_ > 0 else 110, gap=2.6, op=0.55, cross=1))
+    for s_ in (-1, 1):
+        p.shape([(160 + s_ * 14, 62), (160 + s_ * 34, 30), (160 + s_ * 40, 60)], w=1.3, hatch=dict(angle=45, gap=2.4, op=0.5))
+    humanoid(p, 160, 172, 140, head='plain', face_kind='fangs', armor=True, shade=0.4)
+
+
+# ---------------- Plaguewood Necropolis (zombies) ----------------
+@art('Rotting Walker')
+def _(p):
+    floor(p, cracks=False)
+    for x, t in [(40, -0.1), (275, 0.12)]:
+        tombstone(p, x, 172, tilt=t)
+    humanoid(p, 140, 172, 125, head='plain', face_kind='grim', hunch=0.35, arms='forward', shade=0.45)
+    flies(p, 160, 60, 5, 20)
+
+
+@art('Crawling Torso')
+def _(p):
+    floor(p)
+    bricks(p)
+    torso = [(110, 150), (190, 140), (200, 165), (115, 172)]
+    p.shape(torso, w=1.6, hatch=dict(angle=60, gap=3, op=0.45))
+    for k in range(4):
+        p.line([(130 + k * 14, 146), (128 + k * 14, 168)], w=0.9, passes=1, op=0.6)
+    p.shape(ell(212, 138, 16, 15, 14), w=1.5, hatch=dict(angle=130, gap=3, op=0.3))
+    face(p, 214, 138, 15, 'angry')
+    limb(p, [(195, 150), (240, 150), (262, 170)], 12, hatch_op=0.4)
+    limb(p, [(185, 160), (225, 170), (248, 174)], 12, hatch_op=0.55)
+    for k in range(5):
+        p.line([(70 + k * 8, 172), (100, 165 - k)], w=0.8, passes=1, op=0.45)
+
+
+@art('Bloated Corpse')
+def _(p):
+    bricks(p); floor(p)
+    p.smudge(160, 174, 80, 9, op=0.3)
+    for s_ in (-1, 1):
+        limb(p, [(160 + s_ * 25, 140), (160 + s_ * 30, 172)], 18, hatch_op=0.45)
+    belly = ell(160, 115, 62, 52, 22)
+    p.shape(belly, w=1.8, hatch=dict(angle=140, gap=3.2, op=0.35))
+    p.hatch(ell(185, 120, 40, 45, 14), angle=30, gap=2.2, op=0.4)
+    for k in range(4):
+        p.line(ell(150 + k * 10, 120 + k * 6, 14 - k * 2, 6, 10, 0.2, 2.8), w=0.8, passes=1, op=0.6)
+    for s_ in (-1, 1):
+        limb(p, [(160 + s_ * 55, 95), (160 + s_ * 75, 125), (160 + s_ * 70, 145)], 14, hatch_op=0.4)
+    p.shape(ell(160, 55, 18, 18, 14), w=1.5, hatch=dict(angle=130, gap=3, op=0.3))
+    face(p, 160, 55, 18, 'grim')
+    flies(p, 160, 45, 9, 45)
+
+
+@art('Zombie Hound')
+def _(p):
+    floor(p, cracks=False)
+    tombstone(p, 40, 172); tombstone(p, 285, 172, tilt=-0.1)
+    beast(p, 155, 172, 140, 95, kind='wolf')
+    for k in range(5):
+        x = 120 + k * 14
+        p.line([(x, 112), (x + 3, 136)], w=1.2, passes=1, op=0.7)
+    flies(p, 120, 95, 5, 20)
+
+
+@art('Plague Doctor')
+def _(p):
+    bricks(p); floor(p)
+    humanoid(p, 150, 172, 130, head='beak', weapon='staff', robe=True, cloak=True, shade=0.45)
+    for k in range(6):
+        p.line([(40 + k * 6, 160 - k * 18), (46 + k * 6, 150 - k * 18)], w=0.6, passes=1, op=0.4)
+
+
+@art('Grave Digger')
+def _(p):
+    floor(p, cracks=False)
+    mound = ell(235, 172, 70, 24, 20, math.pi, 2 * math.pi) + [(305, 172), (165, 172)]
+    p.shape(mound, w=1.4, hatch=dict(angle=20, gap=3, op=0.4))
+    tombstone(p, 270, 150, 22, 34)
+    humanoid(p, 120, 172, 125, head='plain', face_kind='grim', weapon='spear', hunch=0.2, shade=0.4)
+    p.glow(60, 156, 22); p.shape([(52, 146), (68, 146), (66, 170), (54, 170)], w=1.1, sharp=True)
+    p.line([(54, 146), (60, 138), (66, 146)], w=1.0, passes=1)
+
+
+@art('Corpse Horde')
+def _(p):
+    floor(p, cracks=False)
+    for i, (x, h_) in enumerate([(60, 80), (250, 85), (110, 95), (200, 100), (155, 115)]):
+        humanoid(p, x, 172, h_, head='plain', face_kind='grim' if i % 2 else 'angry', hunch=0.3, arms='forward', shade=0.3 + i * 0.05)
+    flies(p, 160, 40, 10, 80)
+
+
+@art('Bone Horror')
+def _(p):
+    bricks(p); floor(p)
+    for k in range(6):
+        p.shape(ell(70 + k * 36, 170, 9, 4, 10), w=1)
+    humanoid(p, 160, 172, 140, build='bulky', head='horns', skeleton=True, weapon='club')
+    for s_ in (-1, 1):
+        p.line([(160 + s_ * 20, 90), (160 + s_ * 60, 70), (160 + s_ * 80, 50)], w=2.0)
+        p.line([(160 + s_ * 22, 100), (160 + s_ * 66, 110), (160 + s_ * 90, 100)], w=2.0)
+
+
+@art('Plague Rats')
+def _(p):
+    bricks(p); floor(p)
+    for (x, sc) in [(70, 0.6), (250, 0.65), (160, 0.85), (115, 0.5), (210, 0.5)]:
+        beast(p, x, 172, 110 * sc, 80 * sc, kind='rat')
+    flies(p, 160, 100, 8, 70)
+
+
+@art('Zombie Knight')
+def _(p):
+    bricks(p); floor(p)
+    humanoid(p, 150, 172, 145, head='helm', armor=True, arms='forward', cloak=True, shade=0.5)
+    for k in range(5):
+        p.line([(120 + k * 12, 120), (118 + k * 12, 132)], w=0.8, passes=1, op=0.6)
+    flies(p, 160, 40, 5, 25)
+
+
+@art('Gravemind')
+def _(p):
+    bricks(p); floor(p)
+    for k in range(8):
+        a = math.pi * (0.1 + k * 0.11)
+        tentacle(p, 160 + 55 * math.cos(a), 125, 70, 90 - (k - 3.5) * 16, curl=0.4 * (1 if k % 2 else -1), width=10, op=0.35)
+    brain = ell(160, 95, 70, 48, 24)
+    p.shape(brain, w=2.0, hatch=dict(angle=150, gap=3.2, op=0.3))
+    p.line([(160, 50), (162, 140)], w=1.4)
+    for k in range(9):
+        x0 = 105 + k * 12
+        p.line([(x0, 70 + (k % 3) * 8), (x0 + 6, 85), (x0 - 3, 100), (x0 + 5, 118)], w=0.9, passes=1, op=0.7)
+    for (x, y) in [(130, 90), (192, 92)]:
+        p.el.append(f'<ellipse cx="{x}" cy="{y}" rx="7" ry="3" fill="#fffaf0"/>')
+        p.glow(x, y, 12)
+
+
+@art('Ghoul Matron')
+def _(p):
+    floor(p, cracks=False)
+    for x, t in [(45, 0.08), (270, -0.12), (230, 0.05)]:
+        tombstone(p, x, 172, tilt=t)
+    humanoid(p, 145, 172, 125, head='hood', weapon='staff', robe=True, hunch=0.4, shade=0.4)
+
+
+@art('Mass Grave')
+def _(p):
+    bricks(p, bottom=95)
+    floor(p, y=95, cracks=False)
+    p.fill([(0, 95), (320, 95), (320, 200), (0, 200)], color=PAPER)
+    p.hatch([(0, 95), (320, 95), (320, 200), (0, 200)], angle=8, gap=7, op=0.25)
+    pit(p, 160, 145, 120, 38)
+    for (x, y, ang) in [(110, 150, -70), (150, 158, -95), (195, 152, -110), (230, 150, -80), (130, 160, -60)]:
+        pts = tentacle(p, x, y + 10, 46, ang, curl=0.0, width=12, op=0.45)
+        tx, ty = pts[-1]
+        for k in range(4):
+            p.line([(tx, ty), (tx + (k - 1.5) * 5, ty - 11)], w=1.4, passes=1)
+    for x in (40, 285):
+        tombstone(p, x, 110, 20, 30)
+
+
+@art('Quarantine Gate')
+def _(p):
+    bricks(p); floor(p)
+    arch_frame(p, 160, 18, 85, 172)
+    for k in range(8):
+        x = 90 + k * 20
+        p.line([(x, 50), (x, 172)], w=2.4)
+        p.shape([(x - 3, 172), (x, 180), (x + 3, 172)], w=1)
+    for y in (70, 110, 150):
+        p.line([(80, y), (240, y)], w=2.0)
+    p.shape([(140, 92), (180, 92), (180, 128), (140, 128)], w=1.6, hatch=dict(angle=45, gap=4, op=0.2), sharp=True)
+    p.line([(146, 98), (174, 122)], w=2.2); p.line([(174, 98), (146, 122)], w=2.2)
+    for x in (110, 220):
+        p.line([(x, 175), (x + 8, 150), (x + 14, 176)], w=1.0, passes=1, op=0.5)
+
+
+@art('Plague Fog')
+def _(p):
+    floor(p, cracks=False)
+    for x, t in [(40, 0.1), (110, -0.05), (210, 0.12), (280, -0.1)]:
+        tombstone(p, x, 172, 24, 44, tilt=t)
+    for (x, y, r) in [(80, 140, 50), (180, 125, 60), (270, 145, 45), (140, 90, 40)]:
+        for k in range(3):
+            p.line(ell(x, y, r - k * 12, (r - k * 12) * 0.5, 18, 0.2, 1.8 * math.pi), w=1.0, passes=1, op=0.55)
+        p.hatch(ell(x, y, r, r * 0.5, 16), angle=random.choice([15, 165]), gap=5, op=0.22)
+    p.dot(170, 70, 2.5); p.dot(184, 70, 2.5)
+
+
+@art('The Plague Colossus')
+def _(p):
+    floor(p, cracks=False)
+    for x, t in [(30, 0.1), (290, -0.12)]:
+        tombstone(p, x, 172, tilt=t)
+    humanoid(p, 160, 176, 165, build='bulky', head='plain', face_kind='angry', hunch=0.4, arms='forward', shade=0.5)
+    for (x, y, r) in [(130, 110, 8), (175, 98, 7), (150, 130, 7), (190, 125, 6), (122, 85, 6)]:
+        p.shape(ell(x, y, r, r, 10), w=1.0, hatch=dict(angle=130, gap=2.2, op=0.3))
+        face(p, x, y, r, 'grim')
+    flies(p, 160, 40, 14, 100)
+
+
+# ---------------- Sunken R'lyeh (cosmic horror) ----------------
+@art('Fishman Raider')
+def _(p):
+    water(p, 168, 3)
+    for x in (25, 290):
+        rock(p, x, 160, 24)
+    humanoid(p, 150, 172, 125, head='fish', weapon='spear', tail=False, shade=0.45)
+    for k in range(4):
+        p.line([(110 + k * 14, 172), (106 + k * 14, 180)], w=0.8, passes=1, op=0.5)
+
+
+@art('Fishman Priest')
+def _(p):
+    ruins(p, 4); floor(p, cracks=False)
+    humanoid(p, 155, 172, 135, head='fish', weapon='staff', robe=True, cloak=True, shade=0.4)
+
+
+@art('Tentacle Horror')
+def _(p):
+    bricks(p); floor(p)
+    p.fill(ell(160, 174, 95, 16, 20), color=INK, op=0.75)
+    for (x, ang, curl, w_) in [(90, -100, 0.6, 18), (130, -85, -0.5, 24), (175, -95, 0.55, 26), (215, -80, -0.6, 20), (245, -70, 0.4, 14), (110, -120, -0.3, 12)]:
+        tentacle(p, x, 176, random.uniform(110, 150), ang, curl=curl, width=w_)
+
+
+@art('Gibbering Mass')
+def _(p):
+    bricks(p); floor(p)
+    p.smudge(160, 174, 100, 10, op=0.3)
+    blob(p, 160, 120, 100, 52, drips=6, eyes=0, op=0.3)
+    for (x, y, r) in [(110, 105, 9), (150, 95, 12), (195, 110, 8), (225, 125, 6), (95, 135, 6), (170, 130, 7), (130, 140, 5), (210, 90, 6)]:
+        p.shape(ell(x, y, r, r * 0.8, 12), w=1.1)
+        p.dot(x + 1, y + 1, r * 0.4)
+    for (x, y) in [(125, 120), (185, 140), (235, 105)]:
+        teeth = [(x - 10 + i * 3.3, y + (3 if i % 2 else 0)) for i in range(7)]
+        p.line(teeth, w=1.0, passes=1, j=0.3)
+
+
+@art('Star Spawn')
+def _(p):
+    ruins(p, 5); floor(p, cracks=False)
+    p.glow(260, 30, 22); p.glow(60, 25, 14)
+    humanoid(p, 160, 178, 150, build='bulky', head='squid', wing=True, shade=0.5)
+
+
+@art('Dreaming Cultist')
+def _(p):
+    ruins(p, 4); floor(p, cracks=False)
+    p.line(ell(160, 178, 90, 10, 26), w=1.0, closed=True, op=0.6)
+    for k in range(5):
+        a = k * 2 * math.pi / 5 - math.pi / 2
+        p.line([(160 + 80 * math.cos(a), 178 + 9 * math.sin(a)), (160 + 80 * math.cos(a + 2 * math.pi * 2 / 5), 178 + 9 * math.sin(a + 2 * math.pi * 2 / 5))], w=0.7, passes=1, op=0.5)
+    humanoid(p, 160, 172, 125, head='hood', weapon='skullstaff', robe=True, shade=0.45)
+    for k in range(4):
+        p.line([(130 + k * 20, 40), (125 + k * 22, 20)], w=0.6, passes=1, op=0.4)
+
+
+@art('Eye of the Deep')
+def _(p):
+    p.fill([(0, 0), (320, 0), (320, 200), (0, 200)], color=INK, op=0.3)
+    p.hatch([(0, 0), (320, 0), (320, 200), (0, 200)], angle=60, gap=2.4, op=0.6, cross=1)
+    p.el.append(f'<ellipse cx="160" cy="100" rx="120" ry="70" fill="{PAPER}" opacity=".85" filter="url(#blur)"/>')
+    for (ang, curl) in [(200, -0.3), (160, 0.3), (-20, 0.3), (20, -0.3)]:
+        x0 = 160 + 95 * math.cos(math.radians(ang))
+        tentacle(p, x0, 100 + 40 * math.sin(math.radians(ang)), 70, ang, curl=curl, width=12, op=0.5)
+    big_eye(p, 160, 100, 95, 46)
+
+
+@art('Drowned Sailor')
+def _(p):
+    water(p, 168, 3)
+    p.line([(30, 168), (40, 60), (45, 60), (50, 168)], w=1.3, back=True, op=0.6)
+    p.line([(10, 80), (75, 80)], w=1.3, back=True, op=0.6)
+    humanoid(p, 160, 172, 125, head='plain', face_kind='grim', hunch=0.3, weapon='dagger', shade=0.5)
+    p.shape([(138, 52), (182, 52), (172, 38), (148, 38)], w=1.3, hatch=dict(angle=10, gap=2.4, op=0.5), sharp=True)
+    for k in range(6):
+        x = 140 + k * 7
+        p.line([(x, 80), (x - 3, 96), (x + 1, 112)], w=0.9, passes=1, op=0.6)
+
+
+@art('Abyssal Crab')
+def _(p):
+    water(p, 172, 2)
+    cx, cy = 160, 120
+    for s_ in (-1, 1):
+        for i in range(4):
+            x0 = cx + s_ * (30 + i * 10)
+            p.line([(x0, cy + 10), (x0 + s_ * 30, cy + 25 - i * 4), (x0 + s_ * 40, 172)], w=2.2)
+        arm = [(cx + s_ * 50, cy - 5), (cx + s_ * 85, cy - 35), (cx + s_ * 95, cy - 60)]
+        limb(p, arm, 14, hatch_op=0.45)
+        claw = [(cx + s_ * 95, cy - 60), (cx + s_ * 125, cy - 80), (cx + s_ * 135, cy - 60), (cx + s_ * 110, cy - 58), (cx + s_ * 130, cy - 45), (cx + s_ * 100, cy - 45)]
+        p.shape(claw, w=1.5, hatch=dict(angle=30, gap=2.6, op=0.5))
+    shell = ell(cx, cy, 70, 34, 22)
+    p.shape(shell, w=1.8, hatch=dict(angle=20, gap=2.8, op=0.45, cross=1))
+    for k in range(7):
+        p.shape([(cx - 60 + k * 20, cy - 30), (cx - 56 + k * 20, cy - 42), (cx - 52 + k * 20, cy - 30)], w=0.9)
+    for s_ in (-1, 1):
+        p.line([(cx + s_ * 12, cy - 30), (cx + s_ * 16, cy - 50)], w=1.4)
+        p.shape(ell(cx + s_ * 16, cy - 53, 4, 4, 8), w=1); p.dot(cx + s_ * 16, cy - 53, 1.8)
+
+
+@art('Mad Prophet')
+def _(p):
+    ruins(p, 4); floor(p, cracks=False)
+    humanoid(p, 150, 172, 130, head='plain', face_kind='angry', hunch=0.25, weapon='staff', cloak=True, shade=0.35)
+    for k in range(9):
+        p.line([(138 + k * 3, 30), (130 + k * 4, 18)], w=0.8, passes=1, op=0.7)
+    for (x, y) in [(60, 70), (250, 60), (230, 110)]:
+        p.el.append(f'<path d="M{x},{y} q8,-10 16,0 q-8,10 -16,0 M{x + 8},{y - 4} v8" fill="none" stroke="{INK}" stroke-width="1.1"/>')
+
+
+@art('Lurker Below')
+def _(p):
+    water(p, 120, 6)
+    p.fill(ell(160, 140, 110, 24, 22), color=INK, op=0.4)
+    for (x, ang, curl) in [(70, -80, 0.5), (110, -100, -0.4), (220, -75, 0.45), (255, -105, -0.5)]:
+        tentacle(p, x, 140, 110, ang, curl=curl, width=16)
+    for (x, y) in [(140, 132), (178, 134)]:
+        p.el.append(f'<ellipse cx="{x}" cy="{y}" rx="8" ry="4" fill="#fffaf0"/>')
+        p.dot(x, y, 2)
+    p.shape([(20, 60), (60, 60), (58, 48), (40, 30), (22, 48)], w=1.3, hatch=dict(angle=10, gap=3, op=0.35), sharp=True)
+    p.line([(40, 60), (40, 115)], w=1.6)
+
+
+@art('Void Polyp')
+def _(p):
+    p.fill([(0, 0), (320, 0), (320, 200), (0, 200)], color=INK, op=0.2)
+    p.hatch([(0, 0), (320, 0), (320, 200), (0, 200)], angle=45, gap=3, op=0.4)
+    for k in range(25):
+        p.dot(random.uniform(5, 315), random.uniform(5, 195), random.uniform(0.6, 1.6), color=PAPER, op=1)
+    for k in range(7):
+        x0 = 105 + k * 18
+        pts = [(x0 + math.sin(j * 0.8 + k) * 10, 105 + j * 12) for j in range(8)]
+        p.line(pts, w=3.5, passes=1, op=0.4)
+        p.line(pts, w=1.1)
+    bell = ell(160, 95, 70, 45, 22, math.pi, 2 * math.pi) + [(230, 95), (215, 108), (195, 100), (175, 110), (160, 102), (145, 110), (125, 100), (105, 108), (90, 95)]
+    p.shape(bell, w=1.8, hatch=dict(angle=120, gap=3, op=0.3))
+    for k in range(4):
+        p.line(ell(160, 95, 70 - k * 14, 45 - k * 10, 14, math.pi * 1.1, math.pi * 1.9), w=0.8, passes=1, op=0.6)
+    p.glow(160, 70, 24)
+
+
+@art('Impossible Stairs')
+def _(p):
+    p.fill([(0, 0), (320, 0), (320, 200), (0, 200)], color=PAPER)
+    def stair(x, y, dx, dy, n, up=1):
+        for i in range(n):
+            a = (x + i * dx, y - i * dy * up)
+            pts = [a, (a[0] + dx, a[1]), (a[0] + dx, a[1] - dy * up), (a[0] + dx * 2, a[1] - dy * up)]
+            p.line(pts, w=1.4, passes=2)
+            p.hatch([a, (a[0] + dx, a[1]), (a[0] + dx, a[1] + 14), (a[0], a[1] + 14)], angle=70, gap=2.6, op=0.4)
+    stair(30, 170, 18, 14, 8)
+    stair(170, 60, 18, 14, 7, up=-1)
+    p.line([(200, 50), (300, 20), (300, 190), (250, 170)], w=1.2, passes=1, op=0.6)
+    p.line([(20, 100), (90, 60), (90, 30)], w=1.2, passes=1, op=0.6)
+    humanoid(p, 120, 112, 45, head='plain', face_kind='grim', shade=0.3)
+    humanoid(p, 250, 145, 40, head='plain', face_kind='grim', shade=0.3)
+
+
+@art('Whispering Idol')
+def _(p):
+    ruins(p, 4); floor(p, cracks=False)
+    base = [(115, 172), (115, 150), (205, 150), (205, 172)]
+    p.shape(base, w=1.6, hatch=dict(angle=10, gap=4, op=0.3), sharp=True)
+    body = [(130, 150), (125, 100), (140, 80), (180, 80), (195, 100), (190, 150)]
+    p.shape(body, w=1.8, hatch=dict(angle=70, gap=3, op=0.4, cross=1))
+    for k in range(5):
+        x = 140 + k * 10
+        p.line([(x, 82), (x - 3 + (k - 2) * 2, 105), (x + (k - 2) * 3, 125)], w=2.2, passes=1, op=0.6)
+    p.shape(ell(160, 62, 26, 24, 16), w=1.6, hatch=dict(angle=130, gap=3, op=0.4))
+    for sx in (-9, 9):
+        p.el.append(f'<ellipse cx="{160 + sx}" cy="60" rx="4" ry="2" fill="#fffaf0"/>')
+    for k in range(6):
+        a = -math.pi / 2 + (k - 2.5) * 0.35
+        p.line([(160 + 40 * math.cos(a), 62 + 40 * math.sin(a)), (160 + 60 * math.cos(a), 62 + 60 * math.sin(a))], w=0.8, passes=1, op=0.5)
+    for (x, y) in [(60, 90), (250, 70), (270, 120)]:
+        p.line([(x, y), (x + 6, y - 4), (x + 12, y), (x + 18, y - 4)], w=0.8, passes=1, op=0.5)
+
+
+@art('Tidal Surge')
+def _(p):
+    ruins(p, 4)
+    wave = [(-5, 200), (-5, 120), (40, 80), (100, 45), (170, 35), (230, 50), (262, 80), (250, 105), (225, 95), (215, 110), (240, 140), (300, 170), (325, 200)]
+    p.shape(wave, w=2.0, hatch=dict(angle=160, gap=3, op=0.35))
+    for k in range(6):
+        p.line([(10 + k * 30, 150 - k * 16), (60 + k * 32, 120 - k * 14), (110 + k * 26, 115 - k * 10)], w=0.9, passes=1, op=0.6)
+    for k in range(10):
+        p.dot(230 + random.uniform(-20, 40), 40 + random.uniform(-15, 25), random.uniform(1, 2.6))
+    p.line(ell(240, 92, 18, 14, 14, -0.5, 4.2), w=1.4)
+
+
+@art('Cthulhu, the Dreamer')
+def _(p):
+    ruins(p, 5)
+    water(p, 168, 3)
+    for s_ in (-1, 1):
+        wings(p, 160 + s_ * 30, 70, 120, up=1.2, side=s_, ribs=5)
+    humanoid(p, 160, 182, 158, build='bulky', head='squid', shade=0.55)
+    for (x, y) in [(40, 30), (280, 22), (300, 60)]:
+        p.glow(x, y, 10)
 
 
 def main():

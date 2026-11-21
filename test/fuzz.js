@@ -64,8 +64,8 @@ function play(players, dungeon) {
   throw new Error('game did not finish');
 }
 
-for (const players of [1, 2, 4]) for (const dg of Object.keys(E.DUNGEONS)) {
-  const N = 60; let won = 0; const floors = {};
+for (const players of (process.env.P||"1,2,4").split(",").map(Number)) for (const dg of (process.env.D ? process.env.D.split(",") : Object.keys(E.DUNGEONS))) {
+  const N = Number(process.env.N) || 60; let won = 0; const floors = {};
   for (let i = 0; i < N; i++) { const r = play(players, dg); if (r.result === 'won') won++; floors[r.floor] = (floors[r.floor] || 0) + 1; }
   console.log(`${players}P ${dg.padEnd(7)} win ${(100 * won / N).toFixed(0)}%  reached floor:`, floors);
 }
